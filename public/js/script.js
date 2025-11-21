@@ -85,7 +85,7 @@ class CinemaManager {
                 <td>${film.rating}</td>
                 <td class="actions-cell">
                     <button onclick="cinemaManager.editFilm(${film.film_id}, '${this.escapeHtml(film.film_title)}', ${film.duration_minutes}, ${film.rating})">Редактировать</button>
-                    <button class="delete" onclick="cinemaManager.deleteFilm(${film.film_id})">Удалить</button>
+                    <button class="delete" onclick="cinemaManager.deleteFilm(${film.film_id}, '${this.escapeHtml(film.film_title)}')">Удалить</button>
                 </td>
             `;
             tbody.appendChild(row);
@@ -95,6 +95,7 @@ class CinemaManager {
     editFilm(id, title, duration, rating) {
         document.getElementById('filmId').value = id;
         document.getElementById('filmTitle').value = title;
+        document.getElementById('filmTitle').readOnly = true; // Запрещаем редактирование названия
         document.getElementById('duration').value = duration;
         document.getElementById('rating').value = rating;
         document.getElementById('filmFormTitle').textContent = 'Редактировать фильм';
@@ -107,20 +108,31 @@ class CinemaManager {
     resetFilmForm() {
         document.getElementById('filmForm').reset();
         document.getElementById('filmId').value = '';
+        document.getElementById('filmTitle').readOnly = false; // Разрешаем ввод названия при добавлении
         document.getElementById('filmFormTitle').textContent = 'Добавить фильм';
         this.currentEditingFilmId = null;
     }
 
     async saveFilm() {
         const filmData = {
-            film_title: document.getElementById('filmTitle').value,
+            film_title: document.getElementById('filmTitle').value.trim(),
             duration_minutes: document.getElementById('duration').value,
             rating: document.getElementById('rating').value
         };
 
         // Validation
-        if (!filmData.film_title.trim()) {
+        if (!filmData.film_title) {
             this.showMessage('Название фильма не может быть пустым', 'error');
+            return;
+        }
+
+        if (filmData.duration_minutes <= 0) {
+            this.showMessage('Длительность фильма должна быть положительным числом', 'error');
+            return;
+        }
+
+        if (filmData.rating < 0 || filmData.rating > 10) {
+            this.showMessage('Рейтинг должен быть от 0 до 10', 'error');
             return;
         }
 
@@ -136,34 +148,39 @@ class CinemaManager {
                 body: JSON.stringify(filmData)
             });
 
+            const result = await response.json();
+
             if (response.ok) {
                 const message = this.currentEditingFilmId ? 'Фильм обновлен' : 'Фильм добавлен';
                 this.showMessage(message, 'success');
                 this.resetFilmForm();
                 await this.loadFilms();
             } else {
-                const error = await response.json();
-                this.showMessage(error.error, 'error');
+                this.showMessage(result.error || 'Произошла ошибка', 'error');
             }
         } catch (error) {
             this.showMessage('Ошибка при сохранении фильма: ' + error.message, 'error');
         }
     }
 
-    async deleteFilm(id) {
-        if (!confirm('Вы уверены, что хотите удалить этот фильм? Это действие нельзя отменить.')) return;
+    async deleteFilm(id, title) {
+        const confirmed = confirm(`Вы уверены, что хотите удалить фильм "${title}"? Это действие также удалит все связанные сеансы и не может быть отменено.`);
+        
+        if (!confirmed) return;
 
         try {
             const response = await fetch(`/api/films/${id}`, {
                 method: 'DELETE'
             });
 
+            const result = await response.json();
+
             if (response.ok) {
-                this.showMessage('Фильм удален', 'success');
+                this.showMessage(result.message, 'success');
                 await this.loadFilms();
+                await this.loadSessions(); // Перезагружаем сеансы, так как они могли измениться
             } else {
-                const error = await response.json();
-                this.showMessage(error.error, 'error');
+                this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
             }
         } catch (error) {
             this.showMessage('Ошибка при удалении фильма: ' + error.message, 'error');
@@ -200,7 +217,7 @@ class CinemaManager {
                 <td>${hall.capacity}</td>
                 <td class="actions-cell">
                     <button onclick="cinemaManager.editHall(${hall.hall_id}, ${hall.hall_number}, ${hall.capacity})">Редактировать</button>
-                    <button class="delete" onclick="cinemaManager.deleteHall(${hall.hall_id})">Удалить</button>
+                    <button class="delete" onclick="cinemaManager.deleteHall(${hall.hall_id}, ${hall.hall_number})">Удалить</button>
                 </td>
             `;
             tbody.appendChild(row);
@@ -231,6 +248,17 @@ class CinemaManager {
             capacity: document.getElementById('capacity').value
         };
 
+        // Validation
+        if (hallData.hall_number <= 0) {
+            this.showMessage('Номер зала должен быть положительным числом', 'error');
+            return;
+        }
+
+        if (hallData.capacity <= 0) {
+            this.showMessage('Вместимость зала должна быть положительным числом', 'error');
+            return;
+        }
+
         try {
             const url = this.currentEditingHallId ? `/api/halls/${this.currentEditingHallId}` : '/api/halls';
             const method = this.currentEditingHallId ? 'PUT' : 'POST';
@@ -243,34 +271,39 @@ class CinemaManager {
                 body: JSON.stringify(hallData)
             });
 
+            const result = await response.json();
+
             if (response.ok) {
                 const message = this.currentEditingHallId ? 'Зал обновлен' : 'Зал добавлен';
                 this.showMessage(message, 'success');
                 this.resetHallForm();
                 await this.loadHalls();
             } else {
-                const error = await response.json();
-                this.showMessage(error.error, 'error');
+                this.showMessage(result.error || 'Произошла ошибка', 'error');
             }
         } catch (error) {
             this.showMessage('Ошибка при сохранении зала: ' + error.message, 'error');
         }
     }
 
-    async deleteHall(id) {
-        if (!confirm('Вы уверены, что хотите удалить этот зал? Это действие нельзя отменить.')) return;
+    async deleteHall(id, hallNumber) {
+        const confirmed = confirm(`Вы уверены, что хотите удалить зал №${hallNumber}? Это действие не может быть отменено.`);
+        
+        if (!confirmed) return;
 
         try {
             const response = await fetch(`/api/halls/${id}`, {
                 method: 'DELETE'
             });
 
+            const result = await response.json();
+
             if (response.ok) {
-                this.showMessage('Зал удален', 'success');
+                this.showMessage(result.message, 'success');
                 await this.loadHalls();
+                await this.loadSessions(); // Перезагружаем сеансы, так как они могли измениться
             } else {
-                const error = await response.json();
-                this.showMessage(error.error, 'error');
+                this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
             }
         } catch (error) {
             this.showMessage('Ошибка при удалении зала: ' + error.message, 'error');

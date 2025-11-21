@@ -53,7 +53,7 @@ app.get('/api/films', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка сервера' });
+        res.status(500).json({ error: 'Ошибка сервера при загрузке фильмов' });
     }
 });
 
@@ -65,6 +65,18 @@ app.post('/api/films', async (req, res) => {
         const sanitizedDuration = parseInt(duration_minutes);
         const sanitizedRating = parseFloat(rating);
 
+        // Проверка на существующий фильм
+        const existingFilm = await pool.query(
+            'SELECT * FROM Films WHERE film_title = $1',
+            [sanitizedTitle]
+        );
+
+        if (existingFilm.rows.length > 0) {
+            return res.status(400).json({ 
+                error: `Фильм "${sanitizedTitle}" уже существует в базе данных` 
+            });
+        }
+
         const result = await pool.query(
             'INSERT INTO Films (film_title, duration_minutes, rating) VALUES ($1, $2, $3) RETURNING *',
             [sanitizedTitle, sanitizedDuration, sanitizedRating]
@@ -72,22 +84,25 @@ app.post('/api/films', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка при добавлении фильма' });
+        if (err.code === '23505') { // unique violation
+            res.status(400).json({ error: `Фильм "${req.body.film_title}" уже существует` });
+        } else {
+            res.status(500).json({ error: 'Ошибка при добавлении фильма: ' + err.message });
+        }
     }
 });
 
 app.put('/api/films/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { film_title, duration_minutes, rating } = req.body;
+        const { duration_minutes, rating } = req.body;
         
-        const sanitizedTitle = sanitizeInput(film_title);
         const sanitizedDuration = parseInt(duration_minutes);
         const sanitizedRating = parseFloat(rating);
 
         const result = await pool.query(
-            'UPDATE Films SET film_title = $1, duration_minutes = $2, rating = $3 WHERE film_id = $4 RETURNING *',
-            [sanitizedTitle, sanitizedDuration, sanitizedRating, id]
+            'UPDATE Films SET duration_minutes = $1, rating = $2 WHERE film_id = $3 RETURNING *',
+            [sanitizedDuration, sanitizedRating, id]
         );
         
         if (result.rowCount === 0) {
@@ -97,23 +112,29 @@ app.put('/api/films/:id', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка при обновлении фильма' });
+        res.status(500).json({ error: 'Ошибка при обновлении фильма: ' + err.message });
     }
 });
 
 app.delete('/api/films/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await pool.query('DELETE FROM Films WHERE film_id = $1', [id]);
         
-        if (result.rowCount === 0) {
+        // Проверяем существование фильма
+        const filmCheck = await pool.query('SELECT * FROM Films WHERE film_id = $1', [id]);
+        if (filmCheck.rowCount === 0) {
             return res.status(404).json({ error: 'Фильм не найден' });
         }
+
+        const result = await pool.query('DELETE FROM Films WHERE film_id = $1', [id]);
         
-        res.json({ message: 'Фильм удален' });
+        res.json({ 
+            message: 'Фильм и все связанные сеансы успешно удалены',
+            deletedFilm: filmCheck.rows[0]
+        });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка при удалении фильма' });
+        res.status(500).json({ error: 'Ошибка при удалении фильма: ' + err.message });
     }
 });
 
@@ -124,7 +145,7 @@ app.get('/api/halls', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка сервера' });
+        res.status(500).json({ error: 'Ошибка сервера при загрузке залов' });
     }
 });
 
@@ -135,6 +156,18 @@ app.post('/api/halls', async (req, res) => {
         const sanitizedNumber = parseInt(hall_number);
         const sanitizedCapacity = parseInt(capacity);
 
+        // Проверка на существующий зал
+        const existingHall = await pool.query(
+            'SELECT * FROM Halls WHERE hall_number = $1',
+            [sanitizedNumber]
+        );
+
+        if (existingHall.rows.length > 0) {
+            return res.status(400).json({ 
+                error: `Зал с номером ${sanitizedNumber} уже существует` 
+            });
+        }
+
         const result = await pool.query(
             'INSERT INTO Halls (hall_number, capacity) VALUES ($1, $2) RETURNING *',
             [sanitizedNumber, sanitizedCapacity]
@@ -142,7 +175,11 @@ app.post('/api/halls', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка при добавлении зала' });
+        if (err.code === '23505') { // unique violation
+            res.status(400).json({ error: `Зал с номером ${req.body.hall_number} уже существует` });
+        } else {
+            res.status(500).json({ error: 'Ошибка при добавлении зала: ' + err.message });
+        }
     }
 });
 
@@ -153,6 +190,18 @@ app.put('/api/halls/:id', async (req, res) => {
         
         const sanitizedNumber = parseInt(hall_number);
         const sanitizedCapacity = parseInt(capacity);
+
+        // Проверка на дубликат номера зала (кроме текущего)
+        const duplicateCheck = await pool.query(
+            'SELECT * FROM Halls WHERE hall_number = $1 AND hall_id != $2',
+            [sanitizedNumber, id]
+        );
+
+        if (duplicateCheck.rows.length > 0) {
+            return res.status(400).json({ 
+                error: `Зал с номером ${sanitizedNumber} уже существует` 
+            });
+        }
 
         const result = await pool.query(
             'UPDATE Halls SET hall_number = $1, capacity = $2 WHERE hall_id = $3 RETURNING *',
@@ -166,23 +215,41 @@ app.put('/api/halls/:id', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка при обновлении зала' });
+        res.status(500).json({ error: 'Ошибка при обновлении зала: ' + err.message });
     }
 });
 
 app.delete('/api/halls/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await pool.query('DELETE FROM Halls WHERE hall_id = $1', [id]);
         
-        if (result.rowCount === 0) {
+        // Проверяем существование зала
+        const hallCheck = await pool.query('SELECT * FROM Halls WHERE hall_id = $1', [id]);
+        if (hallCheck.rowCount === 0) {
             return res.status(404).json({ error: 'Зал не найден' });
         }
+
+        // Проверяем, есть ли связанные сеансы
+        const sessionsCheck = await pool.query(
+            'SELECT * FROM Sessions WHERE hall_id = $1',
+            [id]
+        );
+
+        if (sessionsCheck.rows.length > 0) {
+            return res.status(400).json({ 
+                error: 'Невозможно удалить зал, так как есть связанные сеансы. Сначала удалите все сеансы в этом зале.' 
+            });
+        }
+
+        const result = await pool.query('DELETE FROM Halls WHERE hall_id = $1', [id]);
         
-        res.json({ message: 'Зал удален' });
+        res.json({ 
+            message: 'Зал успешно удален',
+            deletedHall: hallCheck.rows[0]
+        });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка при удалении зала' });
+        res.status(500).json({ error: 'Ошибка при удалении зала: ' + err.message });
     }
 });
 
@@ -199,7 +266,7 @@ app.get('/api/sessions', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Ошибка сервера' });
+        res.status(500).json({ error: 'Ошибка сервера при загрузке сеансов' });
     }
 });
 

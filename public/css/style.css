@@ -55,8 +55,6 @@ h2 {
     font-weight: 500;
     transition: all 0.3s ease;
     margin: 0 2px;
-    color: #007bff;
-    
 }
 
 .tab:hover { 
@@ -150,6 +148,11 @@ input:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
 }
 
+input:read-only {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
 button { 
     padding: 12px 24px; 
     background: #007bff; 
@@ -227,6 +230,45 @@ button.secondary:hover {
     font-size: 14px;
 }
 
+.form-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.confirmation-dialog {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    max-width: 400px;
+    margin: 100px auto;
+    text-align: center;
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.confirmation-buttons button {
+    min-width: 80px;
+}
+
+button.warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+button.warning:hover {
+    background: #e0a800;
+    box-shadow: 0 4px 12px rgba(255,193,7,0.3);
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 15px;
@@ -246,6 +288,15 @@ button.secondary:hover {
     }
     
     .actions-cell {
+        flex-direction: column;
+    }
+    
+    .confirmation-dialog {
+        margin: 50px 10px;
+        padding: 15px;
+    }
+    
+    .confirmation-buttons {
         flex-direction: column;
     }
 }

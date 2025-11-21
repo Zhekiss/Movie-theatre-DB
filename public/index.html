@@ -22,24 +22,29 @@
         <div id="films" class="tab-content active">
             <h2>Управление фильмами</h2>
             
+            <!-- В форме фильмов добавлены подсказки и улучшена валидация -->
             <div class="form-container">
                 <h3 id="filmFormTitle">Добавить фильм</h3>
                 <form id="filmForm">
                     <input type="hidden" id="filmId">
                     <div class="form-group">
                         <label for="filmTitle">Название фильма:</label>
-                        <input type="text" id="filmTitle" required>
+                        <input type="text" id="filmTitle" required 
+                               placeholder="Введите название фильма">
+                        <small class="form-hint">Название должно быть уникальным</small>
                     </div>
                     <div class="form-group">
                         <label for="duration">Длительность (минут):</label>
-                        <input type="number" id="duration" min="1" required>
+                        <input type="number" id="duration" min="1" required 
+                               placeholder="Продолжительность в минутах">
                     </div>
                     <div class="form-group">
-                        <label for="rating">Рейтинг:</label>
-                        <input type="number" id="rating" min="0" max="10" step="0.1" required>
+                        <label for="rating">Рейтинг (0-10):</label>
+                        <input type="number" id="rating" min="0" max="10" step="0.1" required 
+                               placeholder="Рейтинг от 0 до 10">
                     </div>
                     <button type="submit">Сохранить</button>
-                    <button type="button" id="cancelFilm">Отмена</button>
+                    <button type="button" id="cancelFilm" class="secondary">Отмена</button>
                 </form>
             </div>
 
@@ -61,20 +66,24 @@
         <div id="halls" class="tab-content">
             <h2>Управление залами</h2>
             
+            <!-- В форме залов добавлены подсказки -->
             <div class="form-container">
                 <h3 id="hallFormTitle">Добавить зал</h3>
                 <form id="hallForm">
                     <input type="hidden" id="hallId">
                     <div class="form-group">
                         <label for="hallNumber">Номер зала:</label>
-                        <input type="number" id="hallNumber" min="1" required>
+                        <input type="number" id="hallNumber" min="1" required 
+                               placeholder="Уникальный номер зала">
+                        <small class="form-hint">Номер зала должен быть уникальным</small>
                     </div>
                     <div class="form-group">
                         <label for="capacity">Вместимость:</label>
-                        <input type="number" id="capacity" min="1" required>
+                        <input type="number" id="capacity" min="1" required 
+                               placeholder="Количество мест в зале">
                     </div>
                     <button type="submit">Сохранить</button>
-                    <button type="button" id="cancelHall">Отмена</button>
+                    <button type="button" id="cancelHall" class="secondary">Отмена</button>
                 </form>
             </div>
 
