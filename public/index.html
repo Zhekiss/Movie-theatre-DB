@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление кинотеатром</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Система управления кинотеатром</h1>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="films">Фильмы</button>
+            <button class="tab" data-tab="halls">Залы</button>
+            <button class="tab" data-tab="sessions">Сеансы</button>
+        </div>
+
+        <div id="message"></div>
+
+        <!-- Вкладка Фильмы -->
+        <div id="films" class="tab-content active">
+            <h2>Управление фильмами</h2>
+            
+            <div class="form-container">
+                <h3 id="filmFormTitle">Добавить фильм</h3>
+                <form id="filmForm">
+                    <input type="hidden" id="filmId">
+                    <div class="form-group">
+                        <label for="filmTitle">Название фильма:</label>
+                        <input type="text" id="filmTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Длительность (минут):</label>
+                        <input type="number" id="duration" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rating">Рейтинг:</label>
+                        <input type="number" id="rating" min="0" max="10" step="0.1" required>
+                    </div>
+                    <button type="submit">Сохранить</button>
+                    <button type="button" id="cancelFilm">Отмена</button>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Длительность</th>
+                        <th>Рейтинг</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="filmsTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Вкладка Залы -->
+        <div id="halls" class="tab-content">
+            <h2>Управление залами</h2>
+            
+            <div class="form-container">
+                <h3 id="hallFormTitle">Добавить зал</h3>
+                <form id="hallForm">
+                    <input type="hidden" id="hallId">
+                    <div class="form-group">
+                        <label for="hallNumber">Номер зала:</label>
+                        <input type="number" id="hallNumber" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="capacity">Вместимость:</label>
+                        <input type="number" id="capacity" min="1" required>
+                    </div>
+                    <button type="submit">Сохранить</button>
+                    <button type="button" id="cancelHall">Отмена</button>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Номер зала</th>
+                        <th>Вместимость</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="hallsTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Вкладка Сеансы -->
+        <div id="sessions" class="tab-content">
+            <h2>Сеансы</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Фильм</th>
+                        <th>Зал</th>
+                        <th>Время начала</th>
+                        <th>Цена</th>
+                    </tr>
+                </thead>
+                <tbody id="sessionsTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
