@@ -3,8 +3,11 @@ class CinemaManager {
         this.currentEditingFilmId = null;
         this.currentEditingHallId = null;
         this.currentEditingSessionId = null;
+        this.currentEditingTicketId = null;
         this.films = [];
         this.halls = [];
+        this.sessions = [];
+        this.tickets = [];
         this.init();
     }
 
@@ -12,6 +15,7 @@ class CinemaManager {
         this.loadFilms();
         this.loadHalls();
         this.loadSessions();
+        this.loadTickets();
         this.setupEventListeners();
     }
 
@@ -52,6 +56,16 @@ class CinemaManager {
         document.getElementById('cancelSession').addEventListener('click', () => {
             this.resetSessionForm();
         });
+
+        // Ticket form
+        document.getElementById('ticketForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveTicket();
+        });
+
+        document.getElementById('cancelTicket').addEventListener('click', () => {
+            this.resetTicketForm();
+        });
     }
 
     // Tab management
@@ -69,6 +83,12 @@ class CinemaManager {
         // При переключении на вкладку сеансов обновляем списки фильмов и залов
         if (tabName === 'sessions') {
             this.populateFilmAndHallSelects();
+        }
+        
+        // При переключении на вкладку билетов обновляем список сеансов и показываем билеты
+        if (tabName === 'tickets') {
+            this.populateSessionSelect();
+            this.loadTickets(); // Перезагружаем билеты при каждом открытии вкладки
         }
     }
 
@@ -109,7 +129,6 @@ class CinemaManager {
             tbody.appendChild(row);
         });
 
-        // Добавляем обработчики для кнопок редактирования фильмов
         document.querySelectorAll('.edit-film-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const id = e.target.getAttribute('data-id');
@@ -120,7 +139,6 @@ class CinemaManager {
             });
         });
 
-        // Добавляем обработчики для кнопок удаления фильмов
         document.querySelectorAll('.delete-film-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const id = e.target.getAttribute('data-id');
@@ -367,8 +385,8 @@ class CinemaManager {
             const response = await fetch('/api/sessions');
             if (!response.ok) throw new Error('Network response was not ok');
             
-            const sessions = await response.json();
-            this.renderSessionsTable(sessions);
+            this.sessions = await response.json();
+            this.renderSessionsTable(this.sessions);
         } catch (error) {
             this.showMessage('Ошибка при загрузке сеансов: ' + error.message, 'error');
         }
@@ -425,7 +443,6 @@ class CinemaManager {
         const filmSelect = document.getElementById('sessionFilm');
         const hallSelect = document.getElementById('sessionHall');
 
-        // Заполняем список фильмов
         filmSelect.innerHTML = '<option value="">Выберите фильм</option>';
         this.films.forEach(film => {
             const option = document.createElement('option');
@@ -434,7 +451,6 @@ class CinemaManager {
             filmSelect.appendChild(option);
         });
 
-        // Заполняем список залов
         hallSelect.innerHTML = '<option value="">Выберите зал</option>';
         this.halls.forEach(hall => {
             const option = document.createElement('option');
@@ -449,7 +465,6 @@ class CinemaManager {
         document.getElementById('sessionFilm').value = filmId;
         document.getElementById('sessionHall').value = hallId;
         
-        // Форматируем время для datetime-local input
         const date = new Date(time);
         const formattedTime = date.toISOString().slice(0, 16);
         document.getElementById('sessionTime').value = formattedTime;
@@ -524,27 +539,209 @@ class CinemaManager {
     }
 
     async deleteSession(id, film, hall, time) {
-    const confirmed = confirm(`Вы уверены, что хотите удалить сеанс?\nФильм: ${film}\nЗал: ${hall}\nВремя: ${time}\n\nПри удалении сеанса все связанные билеты также будут удалены.`);
-    
-    if (!confirmed) return;
+        const confirmed = confirm(`Вы уверены, что хотите удалить сеанс?\nФильм: ${film}\nЗал: ${hall}\nВремя: ${time}\n\nПри удалении сеанса все связанные билеты также будут удалены.`);
+        
+        if (!confirmed) return;
 
-    try {
-        const response = await fetch(`/api/sessions/${id}`, {
-            method: 'DELETE'
+        try {
+            const response = await fetch(`/api/sessions/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                this.showMessage(result.message, 'success');
+                await this.loadSessions();
+                await this.loadTickets(); // Обновляем билеты, так как они могли измениться
+            } else {
+                this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
+            }
+        } catch (error) {
+            this.showMessage('Ошибка при удалении сеанса: ' + error.message, 'error');
+        }
+    }
+
+    // Ticket management
+    async loadTickets() {
+        try {
+            const response = await fetch('/api/tickets');
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            this.tickets = await response.json();
+            this.renderTicketsTable(this.tickets);
+        } catch (error) {
+            this.showMessage('Ошибка при загрузке билетов: ' + error.message, 'error');
+        }
+    }
+
+    renderTicketsTable(tickets) {
+        const tbody = document.getElementById('ticketsTable');
+        tbody.innerHTML = '';
+
+        if (tickets.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Нет данных о билетах</td></tr>';
+            return;
+        }
+
+        tickets.forEach(ticket => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${ticket.ticket_id}</td>
+                <td>${new Date(ticket.start_time).toLocaleString('ru-RU')}</td>
+                <td>${this.escapeHtml(ticket.film_title)}</td>
+                <td>${ticket.hall_number}</td>
+                <td>${this.escapeHtml(ticket.customer_name)}</td>
+                <td>${ticket.row_number}</td>
+                <td>${ticket.seat_number}</td>
+                <td class="actions-cell">
+                    <button class="edit-ticket-btn" data-id="${ticket.ticket_id}" data-session-id="${ticket.session_id}" data-customer="${this.escapeHtml(ticket.customer_name)}" data-row="${ticket.row_number}" data-seat="${ticket.seat_number}">Редактировать</button>
+                    <button class="delete delete-ticket-btn" data-id="${ticket.ticket_id}" data-customer="${this.escapeHtml(ticket.customer_name)}" data-film="${this.escapeHtml(ticket.film_title)}" data-time="${new Date(ticket.start_time).toLocaleString('ru-RU')}">Удалить</button>
+                </td>
+            `;
+            tbody.appendChild(row);
         });
 
-        const result = await response.json();
+        document.querySelectorAll('.edit-ticket-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const sessionId = e.target.getAttribute('data-session-id');
+                const customer = e.target.getAttribute('data-customer');
+                const row = e.target.getAttribute('data-row');
+                const seat = e.target.getAttribute('data-seat');
+                this.editTicket(id, sessionId, customer, row, seat);
+            });
+        });
 
-        if (response.ok) {
-            this.showMessage(result.message, 'success');
-            await this.loadSessions();
-        } else {
-            this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
-        }
-    } catch (error) {
-        this.showMessage('Ошибка при удалении сеанса: ' + error.message, 'error');
+        document.querySelectorAll('.delete-ticket-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const customer = e.target.getAttribute('data-customer');
+                const film = e.target.getAttribute('data-film');
+                const time = e.target.getAttribute('data-time');
+                this.deleteTicket(id, customer, film, time);
+            });
+        });
     }
-}
+
+    populateSessionSelect() {
+        const sessionSelect = document.getElementById('ticketSession');
+        sessionSelect.innerHTML = '<option value="">Выберите сеанс</option>';
+        
+        if (this.sessions.length === 0) {
+            // Если сеансы еще не загружены, загружаем их
+            this.loadSessions().then(() => {
+                this.populateSessionSelect(); // Рекурсивно вызываем после загрузки
+            });
+            return;
+        }
+        
+        this.sessions.forEach(session => {
+            const option = document.createElement('option');
+            option.value = session.session_id;
+            option.textContent = `${session.film_title} - Зал ${session.hall_number} - ${new Date(session.start_time).toLocaleString('ru-RU')}`;
+            sessionSelect.appendChild(option);
+        });
+    }
+
+    editTicket(id, sessionId, customer, row, seat) {
+        document.getElementById('ticketId').value = id;
+        document.getElementById('ticketSession').value = sessionId;
+        document.getElementById('ticketSession').disabled = true;
+        document.getElementById('ticketCustomer').value = customer;
+        document.getElementById('ticketRow').value = row;
+        document.getElementById('ticketSeat').value = seat;
+        document.getElementById('ticketFormTitle').textContent = 'Редактировать билет';
+        this.currentEditingTicketId = id;
+        
+        document.getElementById('ticketForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    resetTicketForm() {
+        document.getElementById('ticketForm').reset();
+        document.getElementById('ticketId').value = '';
+        document.getElementById('ticketSession').disabled = false;
+        document.getElementById('ticketFormTitle').textContent = 'Добавить билет';
+        this.currentEditingTicketId = null;
+    }
+
+    async saveTicket() {
+        const ticketData = {
+            session_id: document.getElementById('ticketSession').value,
+            customer_name: document.getElementById('ticketCustomer').value.trim(),
+            row_number: document.getElementById('ticketRow').value,
+            seat_number: document.getElementById('ticketSeat').value
+        };
+
+        if (!ticketData.session_id) {
+            this.showMessage('Выберите сеанс', 'error');
+            return;
+        }
+
+        if (!ticketData.customer_name) {
+            this.showMessage('Введите имя покупателя', 'error');
+            return;
+        }
+
+        if (ticketData.row_number <= 0) {
+            this.showMessage('Номер ряда должен быть положительным числом', 'error');
+            return;
+        }
+
+        if (ticketData.seat_number <= 0) {
+            this.showMessage('Номер места должен быть положительным числом', 'error');
+            return;
+        }
+
+        try {
+            const url = this.currentEditingTicketId ? `/api/tickets/${this.currentEditingTicketId}` : '/api/tickets';
+            const method = this.currentEditingTicketId ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(ticketData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                const message = this.currentEditingTicketId ? 'Билет обновлен' : 'Билет добавлен';
+                this.showMessage(message, 'success');
+                this.resetTicketForm();
+                await this.loadTickets();
+            } else {
+                this.showMessage(result.error || 'Произошла ошибка', 'error');
+            }
+        } catch (error) {
+            this.showMessage('Ошибка при сохранении билета: ' + error.message, 'error');
+        }
+    }
+
+    async deleteTicket(id, customer, film, time) {
+        const confirmed = confirm(`Вы уверены, что хотите удалить билет?\nПокупатель: ${customer}\nФильм: ${film}\nВремя: ${time}`);
+        
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch(`/api/tickets/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                this.showMessage(result.message, 'success');
+                await this.loadTickets();
+            } else {
+                this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
+            }
+        } catch (error) {
+            this.showMessage('Ошибка при удалении билета: ' + error.message, 'error');
+        }
+    }
 
     // Utility functions
     showMessage(text, type) {

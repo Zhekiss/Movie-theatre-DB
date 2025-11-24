@@ -14,6 +14,7 @@
             <button class="tab active" data-tab="films">Фильмы</button>
             <button class="tab" data-tab="halls">Залы</button>
             <button class="tab" data-tab="sessions">Сеансы</button>
+            <button class="tab" data-tab="tickets">Билеты</button>
         </div>
 
         <div id="message"></div>
@@ -145,6 +146,58 @@
                     </tr>
                 </thead>
                 <tbody id="sessionsTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Вкладка Билеты -->
+        <div id="tickets" class="tab-content">
+            <h2>Управление билетами</h2>
+            
+            <div class="form-container">
+                <h3 id="ticketFormTitle">Добавить билет</h3>
+                <form id="ticketForm">
+                    <input type="hidden" id="ticketId">
+                    <div class="form-group">
+                        <label for="ticketSession">Сеанс:</label>
+                        <select id="ticketSession" required>
+                            <option value="">Выберите сеанс</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketCustomer">Имя покупателя:</label>
+                        <input type="text" id="ticketCustomer" required 
+                               placeholder="Введите имя покупателя">
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketRow">Ряд:</label>
+                        <input type="number" id="ticketRow" min="1" required 
+                               placeholder="Номер ряда">
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketSeat">Место:</label>
+                        <input type="number" id="ticketSeat" min="1" required 
+                               placeholder="Номер места">
+                        <small class="form-hint">Убедитесь, что место свободно в выбранном сеансе</small>
+                    </div>
+                    <button type="submit">Сохранить</button>
+                    <button type="button" id="cancelTicket" class="secondary">Отмена</button>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Сеанс</th>
+                        <th>Фильм</th>
+                        <th>Зал</th>
+                        <th>Покупатель</th>
+                        <th>Ряд</th>
+                        <th>Место</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketsTable"></tbody>
             </table>
         </div>
     </div>
