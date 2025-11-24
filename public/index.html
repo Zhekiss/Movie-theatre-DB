@@ -22,7 +22,6 @@
         <div id="films" class="tab-content active">
             <h2>Управление фильмами</h2>
             
-            <!-- В форме фильмов добавлены подсказки и улучшена валидация -->
             <div class="form-container">
                 <h3 id="filmFormTitle">Добавить фильм</h3>
                 <form id="filmForm">
@@ -66,7 +65,6 @@
         <div id="halls" class="tab-content">
             <h2>Управление залами</h2>
             
-            <!-- В форме залов добавлены подсказки -->
             <div class="form-container">
                 <h3 id="hallFormTitle">Добавить зал</h3>
                 <form id="hallForm">
@@ -102,7 +100,39 @@
 
         <!-- Вкладка Сеансы -->
         <div id="sessions" class="tab-content">
-            <h2>Сеансы</h2>
+            <h2>Управление сеансами</h2>
+            
+            <div class="form-container">
+                <h3 id="sessionFormTitle">Добавить сеанс</h3>
+                <form id="sessionForm">
+                    <input type="hidden" id="sessionId">
+                    <div class="form-group">
+                        <label for="sessionFilm">Фильм:</label>
+                        <select id="sessionFilm" required>
+                            <option value="">Выберите фильм</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionHall">Зал:</label>
+                        <select id="sessionHall" required>
+                            <option value="">Выберите зал</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionTime">Время начала:</label>
+                        <input type="datetime-local" id="sessionTime" required>
+                        <small class="form-hint">Минимальный интервал между сеансами в одном зале - 30 минут</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionPrice">Цена (руб.):</label>
+                        <input type="number" id="sessionPrice" min="1" step="0.01" required 
+                               placeholder="Цена билета">
+                    </div>
+                    <button type="submit">Сохранить</button>
+                    <button type="button" id="cancelSession" class="secondary">Отмена</button>
+                </form>
+            </div>
+
             <table>
                 <thead>
                     <tr>
@@ -111,6 +141,7 @@
                         <th>Зал</th>
                         <th>Время начала</th>
                         <th>Цена</th>
+                        <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody id="sessionsTable"></tbody>
