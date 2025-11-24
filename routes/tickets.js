@@ -10,21 +10,99 @@ function ticketsRoutes(pool) {
         return input;
     }
 
-    // Получение всех билетов
     router.get('/', async (req, res) => {
         try {
-            const result = await pool.query(`
+            const { film_id, hall_id, session_id, customer_name } = req.query;
+            
+            let query = `
                 SELECT t.*, s.start_time, f.film_title, h.hall_number 
                 FROM Tickets t 
                 JOIN Sessions s ON t.session_id = s.session_id
                 JOIN Films f ON s.film_id = f.film_id
                 JOIN Halls h ON s.hall_id = h.hall_id
-                ORDER BY t.ticket_id
-            `);
+            `;
+            
+            const conditions = [];
+            const params = [];
+            let paramCount = 0;
+
+            // Добавляем условия фильтрации
+            if (film_id) {
+                paramCount++;
+                conditions.push(`s.film_id = $${paramCount}`);
+                params.push(parseInt(film_id));
+            }
+
+            if (hall_id) {
+                paramCount++;
+                conditions.push(`s.hall_id = $${paramCount}`);
+                params.push(parseInt(hall_id));
+            }
+
+            if (session_id) {
+                paramCount++;
+                conditions.push(`t.session_id = $${paramCount}`);
+                params.push(parseInt(session_id));
+            }
+
+            if (customer_name) {
+                paramCount++;
+                conditions.push(`LOWER(t.customer_name) LIKE LOWER($${paramCount})`);
+                params.push(`%${sanitizeInput(customer_name)}%`);
+            }
+
+            // Добавляем условия WHERE если есть фильтры
+            if (conditions.length > 0) {
+                query += ` WHERE ${conditions.join(' AND ')}`;
+            }
+
+            query += ` ORDER BY t.ticket_id`;
+
+            const result = await pool.query(query, params);
             res.json(result.rows);
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Ошибка сервера при загрузке билетов' });
+        }
+    });
+
+    // Получение статистики по билетам для фильтров
+    router.get('/stats', async (req, res) => {
+        try {
+            // Получаем уникальные значения для фильтров
+            const filmsResult = await pool.query(`
+                SELECT DISTINCT f.film_id, f.film_title 
+                FROM Films f 
+                JOIN Sessions s ON f.film_id = s.film_id
+                JOIN Tickets t ON s.session_id = t.session_id
+                ORDER BY f.film_title
+            `);
+
+            const hallsResult = await pool.query(`
+                SELECT DISTINCT h.hall_id, h.hall_number 
+                FROM Halls h 
+                JOIN Sessions s ON h.hall_id = s.hall_id
+                JOIN Tickets t ON s.session_id = t.session_id
+                ORDER BY h.hall_number
+            `);
+
+            const sessionsResult = await pool.query(`
+                SELECT DISTINCT s.session_id, s.start_time, f.film_title, h.hall_number
+                FROM Sessions s
+                JOIN Films f ON s.film_id = f.film_id
+                JOIN Halls h ON s.hall_id = h.hall_id
+                JOIN Tickets t ON s.session_id = t.session_id
+                ORDER BY s.start_time DESC
+            `);
+
+            res.json({
+                films: filmsResult.rows,
+                halls: hallsResult.rows,
+                sessions: sessionsResult.rows
+            });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Ошибка сервера при загрузке статистики' });
         }
     });
 

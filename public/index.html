@@ -153,6 +153,41 @@
         <div id="tickets" class="tab-content">
             <h2>Управление билетами</h2>
             
+            <!-- Форма поиска и фильтрации -->
+            <div class="search-container">
+                <h3>Поиск и фильтрация билетов</h3>
+                <form id="searchTicketForm">
+                    <div class="search-fields">
+                        <div class="form-group">
+                            <label for="searchFilm">Фильм:</label>
+                            <select id="searchFilm">
+                                <option value="">Все фильмы</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchHall">Зал:</label>
+                            <select id="searchHall">
+                                <option value="">Все залы</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchSession">Сеанс:</label>
+                            <select id="searchSession">
+                                <option value="">Все сеансы</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchCustomer">Покупатель:</label>
+                            <input type="text" id="searchCustomer" placeholder="Имя покупателя">
+                        </div>
+                    </div>
+                    <div class="search-actions">
+                        <button type="submit" class="search-btn">Поиск</button>
+                        <button type="button" id="resetSearch" class="secondary">Сбросить</button>
+                    </div>
+                </form>
+            </div>
+            
             <div class="form-container">
                 <h3 id="ticketFormTitle">Добавить билет</h3>
                 <form id="ticketForm">
@@ -202,6 +237,11 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <!-- Подключаем все JavaScript файлы в правильном порядке -->
+    <script src="js/main.js"></script>
+    <script src="js/films.js"></script>
+    <script src="js/halls.js"></script>
+    <script src="js/sessions.js"></script>
+    <script src="js/tickets.js"></script>
 </body>
 </html>
