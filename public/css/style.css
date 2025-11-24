@@ -53,6 +53,7 @@ h2 {
     border-radius: 6px;
     font-size: 16px;
     font-weight: 500;
+    color: #2e8ef5;
     transition: all 0.3s ease;
     margin: 0 2px;
 }
