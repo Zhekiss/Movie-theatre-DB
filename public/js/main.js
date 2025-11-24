@@ -10,6 +10,7 @@ class CinemaManager {
         this.sessions = [];
         this.tickets = [];
         this.currentTicketFilters = {};
+        this.ticketStatsLoaded = false; // Флаг для отслеживания загрузки статистики
         this.init();
     }
 
@@ -19,6 +20,8 @@ class CinemaManager {
         this.loadSessions();
         this.loadTickets();
         this.setupEventListeners();
+        this.setupSearchForm(); // Инициализация формы поиска
+        this.loadTicketStats(); // Загрузка данных для фильтров
     }
 
     setupEventListeners() {
@@ -91,6 +94,11 @@ class CinemaManager {
         if (tabName === 'tickets') {
             this.populateSessionSelect();
             this.loadTickets(this.currentTicketFilters);
+            
+            // Если статистика еще не загружена, загружаем ее
+            if (!this.ticketStatsLoaded) {
+                this.loadTicketStats();
+            }
         }
     }
 

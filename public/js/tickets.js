@@ -26,51 +26,91 @@ Object.assign(CinemaManager.prototype, {
 
     async loadTicketStats() {
         try {
+            console.log('Загрузка статистики для фильтров...');
             const response = await fetch('/api/tickets/stats');
             if (!response.ok) throw new Error('Network response was not ok');
             
             const stats = await response.json();
+            console.log('Получена статистика:', stats);
             this.populateSearchFilters(stats);
+            this.ticketStatsLoaded = true;
         } catch (error) {
             console.error('Ошибка при загрузке статистики билетов:', error);
+            this.showMessage('Ошибка при загрузке данных для фильтров', 'error');
         }
     },
 
     populateSearchFilters(stats) {
+        console.log('Заполнение фильтров поиска...');
+        
         // Заполняем фильтр по фильмам
         const filmSelect = document.getElementById('searchFilm');
-        filmSelect.innerHTML = '<option value="">Все фильмы</option>';
-        stats.films.forEach(film => {
-            const option = document.createElement('option');
-            option.value = film.film_id;
-            option.textContent = film.film_title;
-            filmSelect.appendChild(option);
-        });
+        if (filmSelect) {
+            filmSelect.innerHTML = '<option value="">Все фильмы</option>';
+            if (stats.films && stats.films.length > 0) {
+                stats.films.forEach(film => {
+                    const option = document.createElement('option');
+                    option.value = film.film_id;
+                    option.textContent = film.film_title;
+                    filmSelect.appendChild(option);
+                });
+                console.log(`Добавлено ${stats.films.length} фильмов в фильтр`);
+            } else {
+                console.log('Нет данных о фильмах для фильтра');
+            }
+        } else {
+            console.error('Элемент searchFilm не найден');
+        }
 
         // Заполняем фильтр по залам
         const hallSelect = document.getElementById('searchHall');
-        hallSelect.innerHTML = '<option value="">Все залы</option>';
-        stats.halls.forEach(hall => {
-            const option = document.createElement('option');
-            option.value = hall.hall_id;
-            option.textContent = `Зал ${hall.hall_number}`;
-            hallSelect.appendChild(option);
-        });
+        if (hallSelect) {
+            hallSelect.innerHTML = '<option value="">Все залы</option>';
+            if (stats.halls && stats.halls.length > 0) {
+                stats.halls.forEach(hall => {
+                    const option = document.createElement('option');
+                    option.value = hall.hall_id;
+                    option.textContent = `Зал ${hall.hall_number}`;
+                    hallSelect.appendChild(option);
+                });
+                console.log(`Добавлено ${stats.halls.length} залов в фильтр`);
+            } else {
+                console.log('Нет данных о залах для фильтра');
+            }
+        } else {
+            console.error('Элемент searchHall не найден');
+        }
 
         // Заполняем фильтр по сеансам
         const sessionSelect = document.getElementById('searchSession');
-        sessionSelect.innerHTML = '<option value="">Все сеансы</option>';
-        stats.sessions.forEach(session => {
-            const option = document.createElement('option');
-            option.value = session.session_id;
-            const sessionDate = new Date(session.start_time).toLocaleString('ru-RU');
-            option.textContent = `${session.film_title} - ${sessionDate}`;
-            sessionSelect.appendChild(option);
-        });
+        if (sessionSelect) {
+            sessionSelect.innerHTML = '<option value="">Все сеансы</option>';
+            if (stats.sessions && stats.sessions.length > 0) {
+                stats.sessions.forEach(session => {
+                    const option = document.createElement('option');
+                    option.value = session.session_id;
+                    const sessionDate = new Date(session.start_time).toLocaleString('ru-RU');
+                    option.textContent = `${session.film_title} - ${sessionDate}`;
+                    sessionSelect.appendChild(option);
+                });
+                console.log(`Добавлено ${stats.sessions.length} сеансов в фильтр`);
+            } else {
+                console.log('Нет данных о сеансах для фильтра');
+            }
+        } else {
+            console.error('Элемент searchSession не найден');
+        }
+        
+        console.log('Заполнение фильтров завершено');
     },
 
     renderTicketsTable(tickets) {
         const tbody = document.getElementById('ticketsTable');
+        if (!tbody) {
+            console.error('Элемент ticketsTable не найден');
+            return;
+        }
+        
         tbody.innerHTML = '';
 
         if (tickets.length === 0) {
@@ -139,36 +179,48 @@ Object.assign(CinemaManager.prototype, {
 
         // Добавляем новый счетчик
         const searchContainer = document.querySelector('.search-container');
-        const counter = document.createElement('div');
-        counter.id = 'resultsCounter';
-        counter.className = 'results-count';
-        counter.textContent = `Найдено билетов: ${count}`;
-        
-        // Вставляем счетчик после формы поиска
-        const searchForm = document.getElementById('searchTicketForm');
-        searchForm.parentNode.insertBefore(counter, searchForm.nextSibling);
+        if (searchContainer) {
+            const counter = document.createElement('div');
+            counter.id = 'resultsCounter';
+            counter.className = 'results-count';
+            counter.textContent = `Найдено билетов: ${count}`;
+            
+            // Вставляем счетчик после формы поиска
+            const searchForm = document.getElementById('searchTicketForm');
+            if (searchForm) {
+                searchForm.parentNode.insertBefore(counter, searchForm.nextSibling);
+            }
+        }
     },
 
     setupSearchForm() {
         const searchForm = document.getElementById('searchTicketForm');
         const resetButton = document.getElementById('resetSearch');
 
-        searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.performSearch();
-        });
+        if (searchForm) {
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.performSearch();
+            });
+        } else {
+            console.error('Форма поиска searchTicketForm не найдена');
+        }
 
-        resetButton.addEventListener('click', () => {
-            this.resetSearch();
-        });
+        if (resetButton) {
+            resetButton.addEventListener('click', () => {
+                this.resetSearch();
+            });
+        } else {
+            console.error('Кнопка сброса поиска resetSearch не найдена');
+        }
     },
 
     performSearch() {
         const filters = {
-            film_id: document.getElementById('searchFilm').value,
-            hall_id: document.getElementById('searchHall').value,
-            session_id: document.getElementById('searchSession').value,
-            customer_name: document.getElementById('searchCustomer').value
+            film_id: document.getElementById('searchFilm') ? document.getElementById('searchFilm').value : '',
+            hall_id: document.getElementById('searchHall') ? document.getElementById('searchHall').value : '',
+            session_id: document.getElementById('searchSession') ? document.getElementById('searchSession').value : '',
+            customer_name: document.getElementById('searchCustomer') ? document.getElementById('searchCustomer').value : ''
         };
 
         // Сохраняем текущие фильтры
@@ -177,18 +229,27 @@ Object.assign(CinemaManager.prototype, {
     },
 
     resetSearch() {
-        document.getElementById('searchTicketForm').reset();
+        const searchForm = document.getElementById('searchTicketForm');
+        if (searchForm) {
+            searchForm.reset();
+        }
         this.currentTicketFilters = {};
         this.loadTickets(); // Загружаем все билеты без фильтров
     },
 
     populateSessionSelect() {
         const sessionSelect = document.getElementById('ticketSession');
+        if (!sessionSelect) {
+            console.error('Элемент ticketSession не найден');
+            return;
+        }
+        
         sessionSelect.innerHTML = '<option value="">Выберите сеанс</option>';
         
         if (this.sessions.length === 0) {
+            // Если сеансы еще не загружены, загружаем их
             this.loadSessions().then(() => {
-                this.populateSessionSelect();
+                this.populateSessionSelect(); // Рекурсивно вызываем после загрузки
             });
             return;
         }

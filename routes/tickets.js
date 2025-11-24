@@ -68,43 +68,43 @@ function ticketsRoutes(pool) {
 
     // Получение статистики по билетам для фильтров
     router.get('/stats', async (req, res) => {
-        try {
-            // Получаем уникальные значения для фильтров
-            const filmsResult = await pool.query(`
-                SELECT DISTINCT f.film_id, f.film_title 
-                FROM Films f 
-                JOIN Sessions s ON f.film_id = s.film_id
-                JOIN Tickets t ON s.session_id = t.session_id
-                ORDER BY f.film_title
-            `);
+    try {
+        // Получаем уникальные значения для фильтров
+        const filmsResult = await pool.query(`
+            SELECT DISTINCT f.film_id, f.film_title 
+            FROM Films f 
+            JOIN Sessions s ON f.film_id = s.film_id
+            JOIN Tickets t ON s.session_id = t.session_id
+            ORDER BY f.film_title
+        `);
 
-            const hallsResult = await pool.query(`
-                SELECT DISTINCT h.hall_id, h.hall_number 
-                FROM Halls h 
-                JOIN Sessions s ON h.hall_id = s.hall_id
-                JOIN Tickets t ON s.session_id = t.session_id
-                ORDER BY h.hall_number
-            `);
+        const hallsResult = await pool.query(`
+            SELECT DISTINCT h.hall_id, h.hall_number 
+            FROM Halls h 
+            JOIN Sessions s ON h.hall_id = s.hall_id
+            JOIN Tickets t ON s.session_id = t.session_id
+            ORDER BY h.hall_number
+        `);
 
-            const sessionsResult = await pool.query(`
-                SELECT DISTINCT s.session_id, s.start_time, f.film_title, h.hall_number
-                FROM Sessions s
-                JOIN Films f ON s.film_id = f.film_id
-                JOIN Halls h ON s.hall_id = h.hall_id
-                JOIN Tickets t ON s.session_id = t.session_id
-                ORDER BY s.start_time DESC
-            `);
+        const sessionsResult = await pool.query(`
+            SELECT DISTINCT s.session_id, s.start_time, f.film_title, h.hall_number
+            FROM Sessions s
+            JOIN Films f ON s.film_id = f.film_id
+            JOIN Halls h ON s.hall_id = h.hall_id
+            JOIN Tickets t ON s.session_id = t.session_id
+            ORDER BY s.start_time DESC
+        `);
 
-            res.json({
-                films: filmsResult.rows,
-                halls: hallsResult.rows,
-                sessions: sessionsResult.rows
-            });
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Ошибка сервера при загрузке статистики' });
-        }
-    });
+        res.json({
+            films: filmsResult.rows,
+            halls: hallsResult.rows,
+            sessions: sessionsResult.rows
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Ошибка сервера при загрузке статистики' });
+    }
+});
 
     // Добавление билета
     router.post('/', async (req, res) => {
