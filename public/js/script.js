@@ -84,18 +84,38 @@ class CinemaManager {
                 <td>${film.duration_minutes}</td>
                 <td>${film.rating}</td>
                 <td class="actions-cell">
-                    <button onclick="cinemaManager.editFilm(${film.film_id}, '${this.escapeHtml(film.film_title)}', ${film.duration_minutes}, ${film.rating})">Редактировать</button>
-                    <button class="delete" onclick="cinemaManager.deleteFilm(${film.film_id}, '${this.escapeHtml(film.film_title)}')">Удалить</button>
+                    <button class="edit-film-btn" data-id="${film.film_id}" data-title="${this.escapeHtml(film.film_title)}" data-duration="${film.duration_minutes}" data-rating="${film.rating}">Редактировать</button>
+                    <button class="delete delete-film-btn" data-id="${film.film_id}" data-title="${this.escapeHtml(film.film_title)}">Удалить</button>
                 </td>
             `;
             tbody.appendChild(row);
+        });
+
+        // Добавляем обработчики для кнопок редактирования фильмов
+        document.querySelectorAll('.edit-film-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const title = e.target.getAttribute('data-title');
+                const duration = e.target.getAttribute('data-duration');
+                const rating = e.target.getAttribute('data-rating');
+                this.editFilm(id, title, duration, rating);
+            });
+        });
+
+        // Добавляем обработчики для кнопок удаления фильмов
+        document.querySelectorAll('.delete-film-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const title = e.target.getAttribute('data-title');
+                this.deleteFilm(id, title);
+            });
         });
     }
 
     editFilm(id, title, duration, rating) {
         document.getElementById('filmId').value = id;
         document.getElementById('filmTitle').value = title;
-        document.getElementById('filmTitle').readOnly = true; // Запрещаем редактирование названия
+        document.getElementById('filmTitle').readOnly = true;
         document.getElementById('duration').value = duration;
         document.getElementById('rating').value = rating;
         document.getElementById('filmFormTitle').textContent = 'Редактировать фильм';
@@ -108,7 +128,7 @@ class CinemaManager {
     resetFilmForm() {
         document.getElementById('filmForm').reset();
         document.getElementById('filmId').value = '';
-        document.getElementById('filmTitle').readOnly = false; // Разрешаем ввод названия при добавлении
+        document.getElementById('filmTitle').readOnly = false;
         document.getElementById('filmFormTitle').textContent = 'Добавить фильм';
         this.currentEditingFilmId = null;
     }
@@ -178,7 +198,7 @@ class CinemaManager {
             if (response.ok) {
                 this.showMessage(result.message, 'success');
                 await this.loadFilms();
-                await this.loadSessions(); // Перезагружаем сеансы, так как они могли измениться
+                await this.loadSessions();
             } else {
                 this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
             }
@@ -216,11 +236,30 @@ class CinemaManager {
                 <td>${hall.hall_number}</td>
                 <td>${hall.capacity}</td>
                 <td class="actions-cell">
-                    <button onclick="cinemaManager.editHall(${hall.hall_id}, ${hall.hall_number}, ${hall.capacity})">Редактировать</button>
-                    <button class="delete" onclick="cinemaManager.deleteHall(${hall.hall_id}, ${hall.hall_number})">Удалить</button>
+                    <button class="edit-hall-btn" data-id="${hall.hall_id}" data-number="${hall.hall_number}" data-capacity="${hall.capacity}">Редактировать</button>
+                    <button class="delete delete-hall-btn" data-id="${hall.hall_id}" data-number="${hall.hall_number}">Удалить</button>
                 </td>
             `;
             tbody.appendChild(row);
+        });
+
+        // Добавляем обработчики для кнопок редактирования залов
+        document.querySelectorAll('.edit-hall-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const number = e.target.getAttribute('data-number');
+                const capacity = e.target.getAttribute('data-capacity');
+                this.editHall(id, number, capacity);
+            });
+        });
+
+        // Добавляем обработчики для кнопок удаления залов
+        document.querySelectorAll('.delete-hall-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const number = e.target.getAttribute('data-number');
+                this.deleteHall(id, number);
+            });
         });
     }
 
@@ -301,7 +340,7 @@ class CinemaManager {
             if (response.ok) {
                 this.showMessage(result.message, 'success');
                 await this.loadHalls();
-                await this.loadSessions(); // Перезагружаем сеансы, так как они могли измениться
+                await this.loadSessions();
             } else {
                 this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
             }
