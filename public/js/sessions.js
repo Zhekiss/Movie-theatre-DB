@@ -1,6 +1,4 @@
-// Расширяем класс CinemaManager для функциональности сеансов
 Object.assign(CinemaManager.prototype, {
-    // Session management
     async loadSessions() {
         try {
             const response = await fetch('/api/sessions');

@@ -1,6 +1,4 @@
-// Расширяем класс CinemaManager для функциональности фильмов
 Object.assign(CinemaManager.prototype, {
-    // Film management
     async loadFilms() {
         try {
             const response = await fetch('/api/films');

@@ -1,12 +1,8 @@
-// Расширяем класс CinemaManager для функциональности билетов
 Object.assign(CinemaManager.prototype, {
-    // Ticket management
     async loadTickets(filters = {}) {
         try {
-            // Создаем URL с параметрами фильтрации
             const url = new URL('/api/tickets', window.location.origin);
             
-            // Добавляем параметры фильтрации
             Object.keys(filters).forEach(key => {
                 if (filters[key]) {
                     url.searchParams.append(key, filters[key]);
@@ -43,7 +39,6 @@ Object.assign(CinemaManager.prototype, {
     populateSearchFilters(stats) {
         console.log('Заполнение фильтров поиска...');
         
-        // Заполняем фильтр по фильмам
         const filmSelect = document.getElementById('searchFilm');
         if (filmSelect) {
             filmSelect.innerHTML = '<option value="">Все фильмы</option>';
@@ -62,7 +57,6 @@ Object.assign(CinemaManager.prototype, {
             console.error('Элемент searchFilm не найден');
         }
 
-        // Заполняем фильтр по залам
         const hallSelect = document.getElementById('searchHall');
         if (hallSelect) {
             hallSelect.innerHTML = '<option value="">Все залы</option>';
@@ -81,7 +75,6 @@ Object.assign(CinemaManager.prototype, {
             console.error('Элемент searchHall не найден');
         }
 
-        // Заполняем фильтр по сеансам
         const sessionSelect = document.getElementById('searchSession');
         if (sessionSelect) {
             sessionSelect.innerHTML = '<option value="">Все сеансы</option>';
@@ -146,7 +139,6 @@ Object.assign(CinemaManager.prototype, {
     },
 
     attachTicketEventListeners() {
-        // Добавляем обработчики для кнопок редактирования билетов
         document.querySelectorAll('.edit-ticket-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const id = e.target.getAttribute('data-id');
@@ -158,7 +150,6 @@ Object.assign(CinemaManager.prototype, {
             });
         });
 
-        // Добавляем обработчики для кнопок удаления билетов
         document.querySelectorAll('.delete-ticket-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const id = e.target.getAttribute('data-id');
@@ -171,13 +162,11 @@ Object.assign(CinemaManager.prototype, {
     },
 
     updateSearchResultsCount(count) {
-        // Удаляем старый счетчик если есть
         const oldCounter = document.getElementById('resultsCounter');
         if (oldCounter) {
             oldCounter.remove();
         }
 
-        // Добавляем новый счетчик
         const searchContainer = document.querySelector('.search-container');
         if (searchContainer) {
             const counter = document.createElement('div');
@@ -185,7 +174,6 @@ Object.assign(CinemaManager.prototype, {
             counter.className = 'results-count';
             counter.textContent = `Найдено билетов: ${count}`;
             
-            // Вставляем счетчик после формы поиска
             const searchForm = document.getElementById('searchTicketForm');
             if (searchForm) {
                 searchForm.parentNode.insertBefore(counter, searchForm.nextSibling);
@@ -223,7 +211,6 @@ Object.assign(CinemaManager.prototype, {
             customer_name: document.getElementById('searchCustomer') ? document.getElementById('searchCustomer').value : ''
         };
 
-        // Сохраняем текущие фильтры
         this.currentTicketFilters = filters;
         this.loadTickets(filters);
     },
@@ -234,7 +221,7 @@ Object.assign(CinemaManager.prototype, {
             searchForm.reset();
         }
         this.currentTicketFilters = {};
-        this.loadTickets(); // Загружаем все билеты без фильтров
+        this.loadTickets();
     },
 
     populateSessionSelect() {
@@ -247,9 +234,8 @@ Object.assign(CinemaManager.prototype, {
         sessionSelect.innerHTML = '<option value="">Выберите сеанс</option>';
         
         if (this.sessions.length === 0) {
-            // Если сеансы еще не загружены, загружаем их
             this.loadSessions().then(() => {
-                this.populateSessionSelect(); // Рекурсивно вызываем после загрузки
+                this.populateSessionSelect();
             });
             return;
         }

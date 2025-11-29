@@ -10,7 +10,6 @@ function sessionsRoutes(pool) {
         return input;
     }
 
-    // Получение всех сеансов
     router.get('/', async (req, res) => {
         try {
             const result = await pool.query(`
@@ -27,7 +26,6 @@ function sessionsRoutes(pool) {
         }
     });
 
-    // Добавление сеанса
     router.post('/', async (req, res) => {
         try {
             const { film_id, hall_id, start_time, price } = req.body;
@@ -36,7 +34,6 @@ function sessionsRoutes(pool) {
             const sanitizedHallId = parseInt(hall_id);
             const sanitizedPrice = parseFloat(price);
 
-            // Проверка существования фильма и зала
             const filmCheck = await pool.query('SELECT * FROM Films WHERE film_id = $1', [sanitizedFilmId]);
             const hallCheck = await pool.query('SELECT * FROM Halls WHERE hall_id = $1', [sanitizedHallId]);
 
@@ -48,7 +45,6 @@ function sessionsRoutes(pool) {
                 return res.status(400).json({ error: 'Указанный зал не существует' });
             }
 
-            // Проверка на пересечение времени сеансов
             const timeConflictCheck = await pool.query(
                 `SELECT * FROM Sessions 
                  WHERE hall_id = $1 
@@ -68,7 +64,6 @@ function sessionsRoutes(pool) {
                 [sanitizedFilmId, sanitizedHallId, start_time, sanitizedPrice]
             );
 
-            // Получаем полную информацию о созданном сеансе
             const fullSession = await pool.query(`
                 SELECT s.*, f.film_title, h.hall_number 
                 FROM Sessions s 
@@ -84,7 +79,6 @@ function sessionsRoutes(pool) {
         }
     });
 
-    // Обновление сеанса
     router.put('/:id', async (req, res) => {
         try {
             const { id } = req.params;
@@ -94,7 +88,6 @@ function sessionsRoutes(pool) {
             const sanitizedHallId = parseInt(hall_id);
             const sanitizedPrice = parseFloat(price);
 
-            // Проверка существования фильма и зала
             const filmCheck = await pool.query('SELECT * FROM Films WHERE film_id = $1', [sanitizedFilmId]);
             const hallCheck = await pool.query('SELECT * FROM Halls WHERE hall_id = $1', [sanitizedHallId]);
 
@@ -106,7 +99,6 @@ function sessionsRoutes(pool) {
                 return res.status(400).json({ error: 'Указанный зал не существует' });
             }
 
-            // Проверка на пересечение времени сеансов (исключая текущий сеанс)
             const timeConflictCheck = await pool.query(
                 `SELECT * FROM Sessions 
                  WHERE hall_id = $1 
@@ -131,7 +123,6 @@ function sessionsRoutes(pool) {
                 return res.status(404).json({ error: 'Сеанс не найден' });
             }
 
-            // Получаем полную информацию об обновленном сеансе
             const fullSession = await pool.query(`
                 SELECT s.*, f.film_title, h.hall_number 
                 FROM Sessions s 
@@ -147,7 +138,6 @@ function sessionsRoutes(pool) {
         }
     });
 
-    // Удаление сеанса
     router.delete('/:id', async (req, res) => {
         try {
             const { id } = req.params;
@@ -157,13 +147,11 @@ function sessionsRoutes(pool) {
                 return res.status(404).json({ error: 'Сеанс не найден' });
             }
 
-            // Удаляем связанные билеты
             const ticketsDeleted = await pool.query(
                 'DELETE FROM Tickets WHERE session_id = $1 RETURNING *',
                 [id]
             );
 
-            // Удаляем сам сеанс
             const result = await pool.query('DELETE FROM Sessions WHERE session_id = $1', [id]);
             
             res.json({ 

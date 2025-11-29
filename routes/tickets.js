@@ -26,7 +26,6 @@ function ticketsRoutes(pool) {
             const params = [];
             let paramCount = 0;
 
-            // Добавляем условия фильтрации
             if (film_id) {
                 paramCount++;
                 conditions.push(`s.film_id = $${paramCount}`);
@@ -51,7 +50,6 @@ function ticketsRoutes(pool) {
                 params.push(`%${sanitizeInput(customer_name)}%`);
             }
 
-            // Добавляем условия WHERE если есть фильтры
             if (conditions.length > 0) {
                 query += ` WHERE ${conditions.join(' AND ')}`;
             }
@@ -66,10 +64,8 @@ function ticketsRoutes(pool) {
         }
     });
 
-    // Получение статистики по билетам для фильтров
     router.get('/stats', async (req, res) => {
     try {
-        // Получаем уникальные значения для фильтров
         const filmsResult = await pool.query(`
             SELECT DISTINCT f.film_id, f.film_title 
             FROM Films f 
@@ -106,7 +102,6 @@ function ticketsRoutes(pool) {
     }
 });
 
-    // Добавление билета
     router.post('/', async (req, res) => {
         try {
             const { session_id, customer_name, seat_number, row_number } = req.body;
@@ -116,13 +111,11 @@ function ticketsRoutes(pool) {
             const sanitizedRowNumber = parseInt(row_number);
             const sanitizedCustomerName = sanitizeInput(customer_name);
 
-            // Проверяем существование сеанса
             const sessionCheck = await pool.query('SELECT * FROM Sessions WHERE session_id = $1', [sanitizedSessionId]);
             if (sessionCheck.rows.length === 0) {
                 return res.status(400).json({ error: 'Указанный сеанс не существует' });
             }
 
-            // Проверяем, не занято ли место в этом сеансе
             const seatConflictCheck = await pool.query(
                 'SELECT * FROM Tickets WHERE session_id = $1 AND seat_number = $2 AND row_number = $3',
                 [sanitizedSessionId, sanitizedSeatNumber, sanitizedRowNumber]
@@ -139,7 +132,6 @@ function ticketsRoutes(pool) {
                 [sanitizedSessionId, sanitizedCustomerName, sanitizedSeatNumber, sanitizedRowNumber]
             );
 
-            // Получаем полную информацию о созданном билете
             const fullTicket = await pool.query(`
                 SELECT t.*, s.start_time, f.film_title, h.hall_number 
                 FROM Tickets t 
@@ -160,7 +152,6 @@ function ticketsRoutes(pool) {
         }
     });
 
-    // Обновление билета
     router.put('/:id', async (req, res) => {
         try {
             const { id } = req.params;
@@ -170,7 +161,6 @@ function ticketsRoutes(pool) {
             const sanitizedRowNumber = parseInt(row_number);
             const sanitizedCustomerName = sanitizeInput(customer_name);
 
-            // Получаем текущий билет, чтобы узнать session_id
             const currentTicket = await pool.query('SELECT * FROM Tickets WHERE ticket_id = $1', [id]);
             if (currentTicket.rows.length === 0) {
                 return res.status(404).json({ error: 'Билет не найден' });
@@ -178,7 +168,6 @@ function ticketsRoutes(pool) {
 
             const sessionId = currentTicket.rows[0].session_id;
 
-            // Проверяем, не занято ли место в этом сеансе другим билетом (кроме текущего)
             const seatConflictCheck = await pool.query(
                 'SELECT * FROM Tickets WHERE session_id = $1 AND seat_number = $2 AND row_number = $3 AND ticket_id != $4',
                 [sessionId, sanitizedSeatNumber, sanitizedRowNumber, id]
@@ -199,7 +188,6 @@ function ticketsRoutes(pool) {
                 return res.status(404).json({ error: 'Билет не найден' });
             }
 
-            // Получаем полную информацию об обновленном билете
             const fullTicket = await pool.query(`
                 SELECT t.*, s.start_time, f.film_title, h.hall_number 
                 FROM Tickets t 
@@ -220,7 +208,6 @@ function ticketsRoutes(pool) {
         }
     });
 
-    // Удаление билета
     router.delete('/:id', async (req, res) => {
         try {
             const { id } = req.params;

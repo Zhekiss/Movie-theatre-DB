@@ -10,7 +10,6 @@ function hallsRoutes(pool) {
         return input;
     }
 
-    // Получение всех залов
     router.get('/', async (req, res) => {
         try {
             const result = await pool.query('SELECT * FROM Halls ORDER BY hall_id');
@@ -21,7 +20,6 @@ function hallsRoutes(pool) {
         }
     });
 
-    // Добавление зала
     router.post('/', async (req, res) => {
         try {
             const { hall_number, capacity } = req.body;
@@ -55,7 +53,6 @@ function hallsRoutes(pool) {
         }
     });
 
-    // Обновление зала
     router.put('/:id', async (req, res) => {
         try {
             const { id } = req.params;
@@ -91,7 +88,6 @@ function hallsRoutes(pool) {
         }
     });
 
-    // Удаление зала
     router.delete('/:id', async (req, res) => {
         const client = await pool.connect();
         try {
@@ -99,20 +95,17 @@ function hallsRoutes(pool) {
 
             const { id } = req.params;
             
-            // Проверяем существование зала
             const hallCheck = await client.query('SELECT * FROM Halls WHERE hall_id = $1', [id]);
             if (hallCheck.rowCount === 0) {
                 await client.query('ROLLBACK');
                 return res.status(404).json({ error: 'Зал не найден' });
             }
 
-            // Получаем информацию о связанных сеансах
             const sessionsCheck = await client.query(
                 'SELECT * FROM Sessions WHERE hall_id = $1',
                 [id]
             );
 
-            // Удаляем билеты связанных сеансов
             let totalTicketsDeleted = 0;
             for (const session of sessionsCheck.rows) {
                 const ticketsResult = await client.query(
@@ -122,13 +115,11 @@ function hallsRoutes(pool) {
                 totalTicketsDeleted += ticketsResult.rowCount;
             }
 
-            // Удаляем связанные сеансы
             const sessionsDeleted = await client.query(
                 'DELETE FROM Sessions WHERE hall_id = $1',
                 [id]
             );
 
-            // Удаляем сам зал
             const result = await client.query('DELETE FROM Halls WHERE hall_id = $1', [id]);
             
             await client.query('COMMIT');

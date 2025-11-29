@@ -10,7 +10,6 @@ function filmsRoutes(pool) {
         return input;
     }
 
-    // Получение всех фильмов
     router.get('/', async (req, res) => {
         try {
             const result = await pool.query('SELECT * FROM Films ORDER BY film_id');
@@ -21,7 +20,6 @@ function filmsRoutes(pool) {
         }
     });
 
-    // Добавление фильма
     router.post('/', async (req, res) => {
         try {
             const { film_title, duration_minutes, rating } = req.body;
@@ -30,7 +28,6 @@ function filmsRoutes(pool) {
             const sanitizedDuration = parseInt(duration_minutes);
             const sanitizedRating = parseFloat(rating);
 
-            // Проверка на существующий фильм
             const existingFilm = await pool.query(
                 'SELECT * FROM Films WHERE film_title = $1',
                 [sanitizedTitle]
@@ -57,7 +54,6 @@ function filmsRoutes(pool) {
         }
     });
 
-    // Обновление фильма
     router.put('/:id', async (req, res) => {
         try {
             const { id } = req.params;
@@ -82,7 +78,6 @@ function filmsRoutes(pool) {
         }
     });
 
-    // Удаление фильма
     router.delete('/:id', async (req, res) => {
         const client = await pool.connect();
         try {
@@ -90,20 +85,17 @@ function filmsRoutes(pool) {
 
             const { id } = req.params;
             
-            // Проверяем существование фильма
             const filmCheck = await client.query('SELECT * FROM Films WHERE film_id = $1', [id]);
             if (filmCheck.rowCount === 0) {
                 await client.query('ROLLBACK');
                 return res.status(404).json({ error: 'Фильм не найден' });
             }
 
-            // Получаем информацию о связанных сеансах
             const sessionsCheck = await client.query(
                 'SELECT * FROM Sessions WHERE film_id = $1',
                 [id]
             );
 
-            // Удаляем билеты связанных сеансов
             let totalTicketsDeleted = 0;
             for (const session of sessionsCheck.rows) {
                 const ticketsResult = await client.query(
@@ -113,13 +105,11 @@ function filmsRoutes(pool) {
                 totalTicketsDeleted += ticketsResult.rowCount;
             }
 
-            // Удаляем связанные сеансы
             const sessionsDeleted = await client.query(
                 'DELETE FROM Sessions WHERE film_id = $1',
                 [id]
             );
 
-            // Удаляем сам фильм
             const result = await client.query('DELETE FROM Films WHERE film_id = $1', [id]);
             
             await client.query('COMMIT');
