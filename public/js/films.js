@@ -55,22 +55,18 @@ Object.assign(CinemaManager.prototype, {
     },
 
     editFilm(id, title, duration, rating) {
-        document.getElementById('filmId').value = id;
-        document.getElementById('filmTitle').value = title;
-        document.getElementById('filmTitle').readOnly = true;
-        document.getElementById('duration').value = duration;
-        document.getElementById('rating').value = rating;
-        document.getElementById('filmFormTitle').textContent = 'Редактировать фильм';
-        this.currentEditingFilmId = id;
+        document.getElementById('editFilmId').value = id;
+        document.getElementById('editFilmTitle').value = title;
+        document.getElementById('editDuration').value = duration;
+        document.getElementById('editRating').value = rating;
         
-        document.getElementById('filmForm').scrollIntoView({ behavior: 'smooth' });
+        this.openModal('editFilmModal');
     },
 
     resetFilmForm() {
-        document.getElementById('filmForm').reset();
+        const form = document.getElementById('filmForm');
+        if (form) form.reset();
         document.getElementById('filmId').value = '';
-        document.getElementById('filmTitle').readOnly = false;
-        document.getElementById('filmFormTitle').textContent = 'Добавить фильм';
         this.currentEditingFilmId = null;
     },
 
@@ -81,24 +77,23 @@ Object.assign(CinemaManager.prototype, {
             rating: document.getElementById('rating').value
         };
 
+        // Валидация
         if (!filmData.film_title) {
             this.showMessage('Название фильма не может быть пустым', 'error');
             return;
         }
-
         if (filmData.duration_minutes <= 0) {
             this.showMessage('Длительность фильма должна быть положительным числом', 'error');
             return;
         }
-
         if (filmData.rating < 0 || filmData.rating > 10) {
             this.showMessage('Рейтинг должен быть от 0 до 10', 'error');
             return;
         }
 
         try {
-            const url = this.currentEditingFilmId ? `/api/films/${this.currentEditingFilmId}` : '/api/films';
-            const method = this.currentEditingFilmId ? 'PUT' : 'POST';
+            const url = '/api/films';
+            const method = 'POST';
 
             const response = await fetch(url, {
                 method: method,
@@ -111,15 +106,55 @@ Object.assign(CinemaManager.prototype, {
             const result = await response.json();
 
             if (response.ok) {
-                const message = this.currentEditingFilmId ? 'Фильм обновлен' : 'Фильм добавлен';
-                this.showMessage(message, 'success');
-                this.resetFilmForm();
+                this.showMessage('Фильм добавлен', 'success');
+                this.hideAddForm('addFilmForm');
                 await this.loadFilms();
             } else {
                 this.showMessage(result.error || 'Произошла ошибка', 'error');
             }
         } catch (error) {
             this.showMessage('Ошибка при сохранении фильма: ' + error.message, 'error');
+        }
+    },
+
+    async saveFilmEdit() {
+        const filmData = {
+            duration_minutes: document.getElementById('editDuration').value,
+            rating: document.getElementById('editRating').value
+        };
+
+        const filmId = document.getElementById('editFilmId').value;
+
+        // Валидация
+        if (filmData.duration_minutes <= 0) {
+            this.showMessage('Длительность фильма должна быть положительным числом', 'error');
+            return;
+        }
+        if (filmData.rating < 0 || filmData.rating > 10) {
+            this.showMessage('Рейтинг должен быть от 0 до 10', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/films/${filmId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(filmData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                this.showMessage('Фильм обновлен', 'success');
+                this.closeModal(document.getElementById('editFilmModal'));
+                await this.loadFilms();
+            } else {
+                this.showMessage(result.error || 'Произошла ошибка', 'error');
+            }
+        } catch (error) {
+            this.showMessage('Ошибка при обновлении фильма: ' + error.message, 'error');
         }
     },
 
@@ -138,8 +173,6 @@ Object.assign(CinemaManager.prototype, {
             if (response.ok) {
                 this.showMessage(result.message, 'success');
                 await this.loadFilms();
-                await this.loadSessions();
-                await this.loadTickets();
             } else {
                 this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
             }

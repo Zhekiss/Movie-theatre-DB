@@ -20,216 +20,367 @@
         <div id="message"></div>
 
         <div id="films" class="tab-content active">
-            <h2>Управление фильмами</h2>
-            
-            <div class="form-container">
-                <h3 id="filmFormTitle">Добавить фильм</h3>
-                <form id="filmForm">
-                    <input type="hidden" id="filmId">
-                    <div class="form-group">
-                        <label for="filmTitle">Название фильма:</label>
-                        <input type="text" id="filmTitle" required 
-                               placeholder="Введите название фильма">
-                        <small class="form-hint">Название должно быть уникальным</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="duration">Длительность (минут):</label>
-                        <input type="number" id="duration" min="1" required 
-                               placeholder="Продолжительность в минутах">
-                    </div>
-                    <div class="form-group">
-                        <label for="rating">Рейтинг (0-10):</label>
-                        <input type="number" id="rating" min="0" max="10" step="0.1" required 
-                               placeholder="Рейтинг от 0 до 10">
-                    </div>
-                    <button type="submit">Сохранить</button>
-                    <button type="button" id="cancelFilm" class="secondary">Отмена</button>
-                </form>
+    <div class="add-btn-container">
+        <h2>Управление фильмами</h2>
+        <button class="add-item-btn" id="showAddFilmForm">+ Добавить фильм</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Длительность</th>
+                <th>Рейтинг</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="filmsTable"></tbody>
+    </table>
+
+    <!-- Форма добавления фильма (скрыта по умолчанию) -->
+    <div id="addFilmForm" class="form-container" style="display: none;">
+        <h3>Добавить фильм</h3>
+        <form id="filmForm">
+            <input type="hidden" id="filmId">
+            <div class="form-group">
+                <label for="filmTitle">Название фильма:</label>
+                <input type="text" id="filmTitle" required 
+                       placeholder="Введите название фильма">
+                <small class="form-hint">Название должно быть уникальным</small>
             </div>
+            <div class="form-group">
+                <label for="duration">Длительность (минут):</label>
+                <input type="number" id="duration" min="1" required 
+                       placeholder="Продолжительность в минутах">
+            </div>
+            <div class="form-group">
+                <label for="rating">Рейтинг (0-10):</label>
+                <input type="number" id="rating" min="0" max="10" step="0.1" required 
+                       placeholder="Рейтинг от 0 до 10">
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" id="cancelFilm" class="secondary">Отмена</button>
+        </form>
+    </div>
+</div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Название</th>
-                        <th>Длительность</th>
-                        <th>Рейтинг</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="filmsTable"></tbody>
-            </table>
+<!-- Модальное окно редактирования фильма -->
+<div id="editFilmModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Редактировать фильм</h3>
+            <button class="close-modal">&times;</button>
         </div>
+        <div class="modal-body">
+            <form id="editFilmForm">
+                <input type="hidden" id="editFilmId">
+                <div class="form-group">
+                    <label for="editFilmTitle">Название фильма:</label>
+                    <input type="text" id="editFilmTitle" readonly 
+                           placeholder="Название фильма">
+                    <small class="form-hint">Название нельзя изменить</small>
+                </div>
+                <div class="form-group">
+                    <label for="editDuration">Длительность (минут):</label>
+                    <input type="number" id="editDuration" min="1" required 
+                           placeholder="Продолжительность в минутах">
+                </div>
+                <div class="form-group">
+                    <label for="editRating">Рейтинг (0-10):</label>
+                    <input type="number" id="editRating" min="0" max="10" step="0.1" required 
+                           placeholder="Рейтинг от 0 до 10">
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Сохранить изменения</button>
+                    <button type="button" class="secondary" id="cancelEditFilm">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-        <div id="halls" class="tab-content">
+    <div id="halls" class="tab-content">
+        <div class="add-btn-container">
             <h2>Управление залами</h2>
-            
-            <div class="form-container">
-                <h3 id="hallFormTitle">Добавить зал</h3>
-                <form id="hallForm">
-                    <input type="hidden" id="hallId">
-                    <div class="form-group">
-                        <label for="hallNumber">Номер зала:</label>
-                        <input type="number" id="hallNumber" min="1" required 
-                               placeholder="Уникальный номер зала">
-                        <small class="form-hint">Номер зала должен быть уникальным</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="capacity">Вместимость:</label>
-                        <input type="number" id="capacity" min="1" required 
-                               placeholder="Количество мест в зале">
-                    </div>
-                    <button type="submit">Сохранить</button>
-                    <button type="button" id="cancelHall" class="secondary">Отмена</button>
-                </form>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Номер зала</th>
-                        <th>Вместимость</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="hallsTable"></tbody>
-            </table>
+            <button class="add-item-btn" id="showAddHallForm">+ Добавить зал</button>
         </div>
+    
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Номер зала</th>
+                    <th>Рядов</th>
+                    <th>Мест в ряду</th>
+                    <th>Всего мест</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="hallsTable"></tbody>
+        </table>
+
+        <!-- Форма добавления зала (скрыта по умолчанию) -->
+        <div id="addHallForm" class="form-container" style="display: none;">
+            <h3>Добавить зал</h3>
+            <form id="hallForm">
+                <input type="hidden" id="hallId">
+                <div class="form-group">
+                    <label for="hallNumber">Номер зала:</label>
+                    <input type="number" id="hallNumber" min="1" required 
+                           placeholder="Уникальный номер зала">
+                    <small class="form-hint">Номер зала должен быть уникальным</small>
+                </div>
+                <div class="form-group">
+                    <label for="rowsCount">Количество рядов:</label>
+                    <input type="number" id="rowsCount" min="1" required 
+                           placeholder="Количество рядов в зале">
+                </div>
+                <div class="form-group">
+                    <label for="seatsPerRow">Мест в ряду:</label>
+                    <input type="number" id="seatsPerRow" min="1" required 
+                           placeholder="Количество мест в одном ряду">
+                </div>
+                <button type="submit">Сохранить</button>
+                <button type="button" id="cancelHall" class="secondary">Отмена</button>
+            </form>
+        </div>
+    </div>
+
+<!-- Модальное окно редактирования зала -->
+<div id="editHallModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Редактировать зал</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editHallForm">
+                <input type="hidden" id="editHallId">
+                <div class="form-group">
+                    <label for="editHallNumber">Номер зала:</label>
+                    <input type="number" id="editHallNumber" min="1" required 
+                           placeholder="Уникальный номер зала">
+                    <small class="form-hint">Номер зала должен быть уникальным</small>
+                </div>
+                <div class="form-group">
+                    <label for="editRowsCount">Количество рядов:</label>
+                    <input type="number" id="editRowsCount" min="1" required 
+                           placeholder="Количество рядов в зале">
+                </div>
+                <div class="form-group">
+                    <label for="editSeatsPerRow">Мест в ряду:</label>
+                    <input type="number" id="editSeatsPerRow" min="1" required 
+                           placeholder="Количество мест в одном ряду">
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Сохранить изменения</button>
+                    <button type="button" class="secondary" id="cancelEditHall">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
         <div id="sessions" class="tab-content">
-            <h2>Управление сеансами</h2>
-            
-            <div class="form-container">
-                <h3 id="sessionFormTitle">Добавить сеанс</h3>
-                <form id="sessionForm">
-                    <input type="hidden" id="sessionId">
-                    <div class="form-group">
-                        <label for="sessionFilm">Фильм:</label>
-                        <select id="sessionFilm" required>
-                            <option value="">Выберите фильм</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="sessionHall">Зал:</label>
-                        <select id="sessionHall" required>
-                            <option value="">Выберите зал</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="sessionTime">Время начала:</label>
-                        <input type="datetime-local" id="sessionTime" required>
-                        <small class="form-hint">Минимальный интервал между сеансами в одном зале - 30 минут</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="sessionPrice">Цена (руб.):</label>
-                        <input type="number" id="sessionPrice" min="1" step="0.01" required 
-                               placeholder="Цена билета">
-                    </div>
-                    <button type="submit">Сохранить</button>
-                    <button type="button" id="cancelSession" class="secondary">Отмена</button>
-                </form>
-            </div>
+    <div class="add-btn-container">
+        <h2>Управление сеансами</h2>
+        <button class="add-item-btn" id="showAddSessionForm">+ Добавить сеанс</button>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Фильм</th>
+                <th>Зал</th>
+                <th>Время начала</th>
+                <th>Цена</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="sessionsTable"></tbody>
+    </table>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Фильм</th>
-                        <th>Зал</th>
-                        <th>Время начала</th>
-                        <th>Цена</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="sessionsTable"></tbody>
-            </table>
+    <!-- Форма добавления сеанса (скрыта по умолчанию) -->
+    <div id="addSessionForm" class="form-container" style="display: none;">
+        <h3>Добавить сеанс</h3>
+        <form id="sessionForm">
+            <input type="hidden" id="sessionId">
+            <div class="form-group">
+                <label for="sessionFilm">Фильм:</label>
+                <select id="sessionFilm" required>
+                    <option value="">Выберите фильм</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sessionHall">Зал:</label>
+                <select id="sessionHall" required>
+                    <option value="">Выберите зал</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sessionTime">Время начала:</label>
+                <input type="datetime-local" id="sessionTime" required>
+                <small class="form-hint">Минимальный интервал между сеансами в одном зале - 30 минут</small>
+            </div>
+            <div class="form-group">
+                <label for="sessionPrice">Цена (руб.):</label>
+                <input type="number" id="sessionPrice" min="1" step="0.01" required 
+                       placeholder="Цена билета">
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" id="cancelSession" class="secondary">Отмена</button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования сеанса -->
+<div id="editSessionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Редактировать сеанс</h3>
+            <button class="close-modal">&times;</button>
         </div>
-
-        <div id="tickets" class="tab-content">
-            <h2>Управление билетами</h2>
-            
-            <div class="search-container">
-                <h3>Поиск и фильтрация билетов</h3>
-                <form id="searchTicketForm">
-                    <div class="search-fields">
-                        <div class="form-group">
-                            <label for="searchFilm">Фильм:</label>
-                            <select id="searchFilm">
-                                <option value="">Все фильмы</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="searchHall">Зал:</label>
-                            <select id="searchHall">
-                                <option value="">Все залы</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="searchSession">Сеанс:</label>
-                            <select id="searchSession">
-                                <option value="">Все сеансы</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="searchCustomer">Покупатель:</label>
-                            <input type="text" id="searchCustomer" placeholder="Имя покупателя">
-                        </div>
-                    </div>
-                    <div class="search-actions">
-                        <button type="submit" class="search-btn">Поиск</button>
-                        <button type="button" id="resetSearch" class="secondary">Сбросить</button>
-                    </div>
-                </form>
-            </div>
-            
-            <div class="form-container">
-                <h3 id="ticketFormTitle">Добавить билет</h3>
-                <form id="ticketForm">
-                    <input type="hidden" id="ticketId">
-                    <div class="form-group">
-                        <label for="ticketSession">Сеанс:</label>
-                        <select id="ticketSession" required>
-                            <option value="">Выберите сеанс</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="ticketCustomer">Имя покупателя:</label>
-                        <input type="text" id="ticketCustomer" required 
-                               placeholder="Введите имя покупателя">
-                    </div>
-                    <div class="form-group">
-                        <label for="ticketRow">Ряд:</label>
-                        <input type="number" id="ticketRow" min="1" required 
-                               placeholder="Номер ряда">
-                    </div>
-                    <div class="form-group">
-                        <label for="ticketSeat">Место:</label>
-                        <input type="number" id="ticketSeat" min="1" required 
-                               placeholder="Номер места">
-                        <small class="form-hint">Убедитесь, что место свободно в выбранном сеансе</small>
-                    </div>
-                    <button type="submit">Сохранить</button>
-                    <button type="button" id="cancelTicket" class="secondary">Отмена</button>
-                </form>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Сеанс</th>
-                        <th>Фильм</th>
-                        <th>Зал</th>
-                        <th>Покупатель</th>
-                        <th>Ряд</th>
-                        <th>Место</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="ticketsTable"></tbody>
-            </table>
+        <div class="modal-body">
+            <form id="editSessionForm">
+                <input type="hidden" id="editSessionId">
+                <div class="form-group">
+                    <label for="editSessionFilm">Фильм:</label>
+                    <select id="editSessionFilm" required>
+                        <option value="">Выберите фильм</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editSessionHall">Зал:</label>
+                    <select id="editSessionHall" required>
+                        <option value="">Выберите зал</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editSessionTime">Время начала:</label>
+                    <input type="datetime-local" id="editSessionTime" required>
+                    <small class="form-hint">Минимальный интервал между сеансами в одном зале - 30 минут</small>
+                </div>
+                <div class="form-group">
+                    <label for="editSessionPrice">Цена (руб.):</label>
+                    <input type="number" id="editSessionPrice" min="1" step="0.01" required 
+                           placeholder="Цена билета">
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Сохранить изменения</button>
+                    <button type="button" class="secondary" id="cancelEditSession">Отмена</button>
+                </div>
+            </form>
         </div>
+    </div>
+</div>
+
+<div id="tickets" class="tab-content">
+    <div class="session-header" id="ticketSessionHeader" style="display: none;">
+        <h2 id="ticketSessionTitle">Билеты сеанса</h2>
+        <div class="session-info" id="ticketSessionInfo"></div>
+        <button class="secondary" id="showAllTickets">Показать все билеты</button>
+    </div>
+    
+    <div class="add-btn-container">
+        <h2 id="ticketsMainTitle">Управление билетами</h2>
+        <!-- Убрали кнопку добавления билета -->
+    </div>
+    
+    <div class="search-container">
+        <h3>Поиск и фильтрация билетов</h3>
+        <form id="searchTicketForm">
+            <div class="search-fields">
+                <div class="form-group">
+                    <label for="searchFilm">Фильм:</label>
+                    <select id="searchFilm">
+                        <option value="">Все фильмы</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchHall">Зал:</label>
+                    <select id="searchHall">
+                        <option value="">Все залы</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchSession">Сеанс:</label>
+                    <select id="searchSession">
+                        <option value="">Все сеансы</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchCustomer">Покупатель:</label>
+                    <input type="text" id="searchCustomer" placeholder="Имя покупателя">
+                </div>
+                <div class="form-group">
+                    <label for="searchOccupied">Статус места:</label>
+                    <select id="searchOccupied">
+                        <option value="">Все</option>
+                        <option value="true">Занято</option>
+                        <option value="false">Свободно</option>
+                    </select>
+                </div>
+            </div>
+            <div class="search-actions">
+                <button type="submit" class="search-btn">Поиск</button>
+                <button type="button" id="resetSearch" class="secondary">Сбросить</button>
+            </div>
+        </form>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Сеанс</th>
+                <th>Фильм</th>
+                <th>Зал</th>
+                <th>Покупатель</th>
+                <th>Ряд</th>
+                <th>Место</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="ticketsTable"></tbody>
+    </table>
+</div>
+
+<!-- Модальное окно редактирования билета -->
+<div id="editTicketModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Редактировать билет</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editTicketForm">
+                <input type="hidden" id="editTicketId">
+                <input type="hidden" id="editTicketSessionId">
+                <div class="ticket-info" id="editTicketInfo"></div>
+                <div class="form-group">
+                    <label for="editTicketCustomer">Имя покупателя:</label>
+                    <input type="text" id="editTicketCustomer" 
+                           placeholder="Введите имя покупателя">
+                    <small class="form-hint">Оставьте пустым, чтобы освободить место</small>
+                </div>
+                <div class="form-group">
+                    <label for="editTicketOccupied">Место занято:</label>
+                    <select id="editTicketOccupied" required>
+                        <option value="false">Свободно</option>
+                        <option value="true">Занято</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Сохранить изменения</button>
+                    <button type="button" class="secondary" id="cancelEditTicket">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
     </div>
 
     <script src="js/main.js"></script>
