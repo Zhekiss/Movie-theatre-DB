@@ -483,3 +483,117 @@ button.warning:hover {
 #showAddTicketForm {
     display: none;
 }
+
+/* Стили для кнопок в заголовке */
+.header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.header-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.header-buttons #showFilmRevenue {
+    background: #17a2b8;
+}
+
+.header-buttons #showFilmRevenue:hover {
+    background: #138496;
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+/* Стили для таблицы дохода */
+.revenue-table {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+}
+
+.revenue-table th {
+    background: #17a2b8;
+    color: white;
+    padding: 15px;
+    text-align: left;
+}
+
+.revenue-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.revenue-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.revenue-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.revenue-table .revenue-high {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.revenue-table .revenue-medium {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.revenue-table .revenue-low {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Сводка дохода */
+.revenue-summary {
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #2196f3;
+}
+
+.revenue-summary p {
+    margin: 5px 0;
+    color: #333;
+}
+
+.revenue-summary strong {
+    color: #1565c0;
+}
+
+/* Общий доход */
+.total-revenue {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #155724;
+    border: 2px solid #c3e6cb;
+}
+
+/* Адаптивность для модального окна дохода */
+@media (max-width: 768px) {
+    .header-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-buttons button {
+        width: 100%;
+    }
+    
+    .revenue-table {
+        font-size: 14px;
+    }
+    
+    .revenue-table th,
+    .revenue-table td {
+        padding: 8px 10px;
+    }
+}

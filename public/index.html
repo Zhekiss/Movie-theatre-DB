@@ -19,10 +19,13 @@
 
         <div id="message"></div>
 
-        <div id="films" class="tab-content active">
+<div id="films" class="tab-content active">
     <div class="add-btn-container">
         <h2>Управление фильмами</h2>
-        <button class="add-item-btn" id="showAddFilmForm">+ Добавить фильм</button>
+        <div class="header-buttons">
+            <button class="add-item-btn" id="showAddFilmForm">+ Добавить фильм</button>
+            <button class="add-item-btn" id="showFilmRevenue">💰 Доход</button>
+        </div>
     </div>
 
     <table>
@@ -62,6 +65,29 @@
             <button type="submit">Сохранить</button>
             <button type="button" id="cancelFilm" class="secondary">Отмена</button>
         </form>
+    </div>
+</div>
+
+<!-- Добавляем модальное окно для отображения дохода -->
+<div id="revenueModal" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Доход по фильмам</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="revenue-summary" id="revenueSummary"></div>
+            <table class="revenue-table">
+                <thead>
+                    <tr>
+                        <th>Фильм</th>
+                        <th>Доход (руб.)</th>
+                    </tr>
+                </thead>
+                <tbody id="revenueTableBody"></tbody>
+            </table>
+            <div class="total-revenue" id="totalRevenue"></div>
+        </div>
     </div>
 </div>
 

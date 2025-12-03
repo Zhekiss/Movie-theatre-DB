@@ -158,6 +158,95 @@ Object.assign(CinemaManager.prototype, {
         }
     },
 
+    async showFilmRevenue() {
+        try {
+            const response = await fetch('/api/films/revenue');
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const revenueData = await response.json();
+            this.displayRevenueModal(revenueData);
+        } catch (error) {
+            this.showMessage('Ошибка при загрузке данных о доходе: ' + error.message, 'error');
+        }
+    },
+    
+    // Метод для отображения модального окна с доходом
+    displayRevenueModal(revenueData) {
+        const tbody = document.getElementById('revenueTableBody');
+        const summary = document.getElementById('revenueSummary');
+        const totalElement = document.getElementById('totalRevenue');
+        
+        if (!tbody || !summary || !totalElement) {
+            console.error('Элементы модального окна дохода не найдены');
+            return;
+        }
+        
+        // Очищаем таблицу
+        tbody.innerHTML = '';
+        
+        if (revenueData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="2" style="text-align: center; color: #6c757d;">
+                        Нет данных о доходе
+                    </td>
+                </tr>
+            `;
+            summary.innerHTML = '<p>Нет данных для анализа</p>';
+            totalElement.textContent = 'Общий доход: 0 руб.';
+        } else {
+            // Сортируем по убыванию дохода
+            revenueData.sort((a, b) => b.revenue - a.revenue);
+            
+            // Рассчитываем общий доход
+            const totalRevenue = revenueData.reduce((sum, film) => sum + parseFloat(film.revenue), 0);
+            
+            // Рассчитываем средний доход
+            const averageRevenue = totalRevenue / revenueData.length;
+            
+            // Находим фильмы с максимальным и минимальным доходом
+            const maxRevenueFilm = revenueData.reduce((max, film) => 
+                film.revenue > max.revenue ? film : max, revenueData[0]);
+            
+            const minRevenueFilm = revenueData.reduce((min, film) => 
+                film.revenue < min.revenue ? film : min, revenueData[0]);
+            
+            // Заполняем сводку
+            summary.innerHTML = `
+                <p><strong>Всего фильмов:</strong> ${revenueData.length}</p>
+                <p><strong>Самый прибыльный фильм:</strong> ${maxRevenueFilm.film_title} (${parseFloat(maxRevenueFilm.revenue).toFixed(2)} руб.)</p>
+                <p><strong>Самый убыточный фильм:</strong> ${minRevenueFilm.film_title} (${parseFloat(minRevenueFilm.revenue).toFixed(2)} руб.)</p>
+                <p><strong>Средний доход на фильм:</strong> ${averageRevenue.toFixed(2)} руб.</p>
+            `;
+            
+            // Заполняем таблицу
+            revenueData.forEach(film => {
+                const row = document.createElement('tr');
+                const revenue = parseFloat(film.revenue);
+                
+                // Определяем класс для цветового кодирования
+                let revenueClass = 'revenue-low';
+                if (revenue >= averageRevenue * 1.5) {
+                    revenueClass = 'revenue-high';
+                } else if (revenue >= averageRevenue) {
+                    revenueClass = 'revenue-medium';
+                }
+                
+                row.innerHTML = `
+                    <td>${this.escapeHtml(film.film_title)}</td>
+                    <td class="${revenueClass}">${revenue.toFixed(2)} руб.</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Отображаем общий доход
+            totalElement.textContent = `Общий доход: ${totalRevenue.toFixed(2)} руб.`;
+        }
+        
+        // Показываем модальное окно
+        this.openModal('revenueModal');
+    },
+
     async deleteFilm(id, title) {
         const confirmed = confirm(`Вы уверены, что хотите удалить фильм "${title}"?\n\nЭто действие также удалит ВСЕ сеансы этого фильма и ВСЕ билеты на эти сеансы.\n\nЭто действие нельзя отменить.`);
         

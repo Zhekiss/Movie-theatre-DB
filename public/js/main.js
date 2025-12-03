@@ -82,6 +82,9 @@ class CinemaManager {
             e.preventDefault();
             this.saveTicketEdit();
         });
+        document.getElementById('showFilmRevenue')?.addEventListener('click', () => {
+        this.showFilmRevenue();
+        });
     }
 
     setupModalEvents() {
@@ -110,6 +113,15 @@ class CinemaManager {
         document.getElementById('cancelEditTicket')?.addEventListener('click', () => {
             this.closeModal(document.getElementById('editTicketModal'));
         });
+
+        const revenueModal = document.getElementById('revenueModal');
+    if (revenueModal) {
+        revenueModal.addEventListener('click', (e) => {
+            if (e.target === revenueModal || e.target.classList.contains('close-modal')) {
+                this.closeModal(revenueModal);
+            }
+        });
+    }
     }
 
     setupTicketEventListeners() {
@@ -250,6 +262,7 @@ class CinemaManager {
     deleteSession() {}
     showSessionHeader() {}
     hideSessionHeader() {}
+    showFilmRevenue() {}
 }
 
 // Инициализация приложения
