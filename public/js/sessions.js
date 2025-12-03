@@ -51,30 +51,28 @@ Object.assign(CinemaManager.prototype, {
         });
 
         document.querySelectorAll('.view-tickets-btn').forEach(button => {
-    button.addEventListener('click', (e) => {
-        const sessionId = e.target.getAttribute('data-id');
-        const filmTitle = e.target.getAttribute('data-film');
-        const hallNumber = e.target.getAttribute('data-hall');
-        const sessionTime = e.target.getAttribute('data-time');
-        const sessionPrice = e.target.getAttribute('data-price');
-        const rowsCount = e.target.getAttribute('data-rows');
-        const seatsPerRow = e.target.getAttribute('data-seats');
-        
-        // Сохраняем информацию о сеансе для отображения в tickets tab
-        window.cinemaManager.currentSessionInfo = {
-            sessionId,
-            filmTitle,
-            hallNumber,
-            sessionTime,
-            sessionPrice,
-            rowsCount,
-            seatsPerRow
-        };
-        
-        // Переключаемся на вкладку билетов
-        window.cinemaManager.openTab('tickets');
-    });
-});
+            button.addEventListener('click', (e) => {
+                const sessionId = e.target.getAttribute('data-id');
+                const filmTitle = e.target.getAttribute('data-film');
+                const hallNumber = e.target.getAttribute('data-hall');
+                const sessionTime = e.target.getAttribute('data-time');
+                const sessionPrice = e.target.getAttribute('data-price');
+                const rowsCount = e.target.getAttribute('data-rows');
+                const seatsPerRow = e.target.getAttribute('data-seats');
+                
+                window.cinemaManager.currentSessionInfo = {
+                    sessionId,
+                    filmTitle,
+                    hallNumber,
+                    sessionTime,
+                    sessionPrice,
+                    rowsCount,
+                    seatsPerRow
+                };
+                
+                window.cinemaManager.openTab('tickets');
+            });
+        });
 
         document.querySelectorAll('.delete-session-btn').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -93,6 +91,7 @@ Object.assign(CinemaManager.prototype, {
         const hallSelect = document.getElementById('sessionHall');
         const editHallSelect = document.getElementById('editSessionHall');
 
+        // Заполняем select для добавления сеанса
         if (filmSelect) {
             filmSelect.innerHTML = '<option value="">Выберите фильм</option>';
             this.films.forEach(film => {
@@ -100,16 +99,6 @@ Object.assign(CinemaManager.prototype, {
                 option.value = film.film_id;
                 option.textContent = film.film_title;
                 filmSelect.appendChild(option);
-            });
-        }
-
-        if (editFilmSelect) {
-            editFilmSelect.innerHTML = '<option value="">Выберите фильм</option>';
-            this.films.forEach(film => {
-                const option = document.createElement('option');
-                option.value = film.film_id;
-                option.textContent = film.film_title;
-                editFilmSelect.appendChild(option);
             });
         }
 
@@ -121,6 +110,17 @@ Object.assign(CinemaManager.prototype, {
                 const totalSeats = hall.rows_count * hall.seats_per_row;
                 option.textContent = `Зал ${hall.hall_number} (${totalSeats} мест, ${hall.rows_count}×${hall.seats_per_row})`;
                 hallSelect.appendChild(option);
+            });
+        }
+
+        // Заполняем select для редактирования сеанса
+        if (editFilmSelect) {
+            editFilmSelect.innerHTML = '<option value="">Выберите фильм</option>';
+            this.films.forEach(film => {
+                const option = document.createElement('option');
+                option.value = film.film_id;
+                option.textContent = film.film_title;
+                editFilmSelect.appendChild(option);
             });
         }
 
@@ -137,10 +137,15 @@ Object.assign(CinemaManager.prototype, {
     },
 
     editSession(id, filmId, hallId, time, price) {
-        document.getElementById('editSessionId').value = id;
+        // Сначала открываем модальное окно
+        this.openModal('editSessionModal');
         
-        // Устанавливаем значения в модальном окне
+        // Затем заполняем select'ы и устанавливаем значения
+        this.populateFilmAndHallSelects();
+        
+        // Устанавливаем значения с небольшой задержкой, чтобы DOM успел обновиться
         setTimeout(() => {
+            document.getElementById('editSessionId').value = id;
             document.getElementById('editSessionFilm').value = filmId;
             document.getElementById('editSessionHall').value = hallId;
             
@@ -149,9 +154,7 @@ Object.assign(CinemaManager.prototype, {
             document.getElementById('editSessionTime').value = formattedTime;
             
             document.getElementById('editSessionPrice').value = price;
-        }, 100);
-        
-        this.openModal('editSessionModal');
+        }, 50);
     },
 
     resetSessionForm() {
@@ -188,11 +191,8 @@ Object.assign(CinemaManager.prototype, {
         }
 
         try {
-            const url = '/api/sessions';
-            const method = 'POST';
-
-            const response = await fetch(url, {
-                method: method,
+            const response = await fetch('/api/sessions', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -223,6 +223,9 @@ Object.assign(CinemaManager.prototype, {
 
         const sessionId = document.getElementById('editSessionId').value;
 
+        console.log('Данные для отправки:', sessionData);
+        console.log('ID сеанса:', sessionId);
+
         // Валидация
         if (!sessionData.film_id) {
             this.showMessage('Выберите фильм', 'error');
@@ -251,6 +254,7 @@ Object.assign(CinemaManager.prototype, {
             });
 
             const result = await response.json();
+            console.log('Ответ сервера:', result);
 
             if (response.ok) {
                 this.showMessage('Сеанс обновлен', 'success');
@@ -260,6 +264,7 @@ Object.assign(CinemaManager.prototype, {
                 this.showMessage(result.error || 'Произошла ошибка', 'error');
             }
         } catch (error) {
+            console.error('Ошибка при обновлении сеанса:', error);
             this.showMessage('Ошибка при обновлении сеанса: ' + error.message, 'error');
         }
     },
