@@ -523,27 +523,18 @@ button.warning:hover {
     border-bottom: 1px solid #e9ecef;
 }
 
+.revenue-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
 .revenue-table tr:hover {
     background-color: #f8f9fa;
 }
 
 .revenue-table tr:nth-child(even) {
     background-color: #f8f9fa;
-}
-
-.revenue-table .revenue-high {
-    color: #28a745;
-    font-weight: bold;
-}
-
-.revenue-table .revenue-medium {
-    color: #ffc107;
-    font-weight: bold;
-}
-
-.revenue-table .revenue-low {
-    color: #dc3545;
-    font-weight: bold;
 }
 
 /* Сводка дохода */
