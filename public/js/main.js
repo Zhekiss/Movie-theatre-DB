@@ -10,7 +10,7 @@ class CinemaManager {
         this.sessions = [];
         this.tickets = [];
         this.currentTicketFilters = {};
-        this.ticketStatsLoaded = false;
+        this.currentSessionInfo = null; // Информация о текущем сеансе для показа билетов
         this.init();
     }
 
@@ -20,9 +20,8 @@ class CinemaManager {
         this.loadSessions();
         this.loadTickets();
         this.setupEventListeners();
-        this.setupSearchForm();
-        this.loadTicketStats();
         this.setupModalEvents();
+        this.setupTicketEventListeners(); // Добавляем обработчики для билетов
     }
 
     setupEventListeners() {
@@ -44,10 +43,6 @@ class CinemaManager {
             this.showAddForm('addSessionForm');
             this.populateFilmAndHallSelects();
         });
-        document.getElementById('showAddTicketForm')?.addEventListener('click', () => {
-            this.showAddForm('addTicketForm');
-            this.populateSessionSelect();
-        });
 
         // Формы добавления
         document.getElementById('filmForm')?.addEventListener('submit', (e) => {
@@ -62,10 +57,6 @@ class CinemaManager {
             e.preventDefault();
             this.saveSession();
         });
-        document.getElementById('ticketForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveTicket();
-        });
 
         // Кнопки отмены в формах добавления
         document.getElementById('cancelFilm')?.addEventListener('click', () => {
@@ -77,18 +68,11 @@ class CinemaManager {
         document.getElementById('cancelSession')?.addEventListener('click', () => {
             this.hideAddForm('addSessionForm');
         });
-        document.getElementById('cancelTicket')?.addEventListener('click', () => {
-            this.hideAddForm('addTicketForm');
-        });
 
         // Формы редактирования в модальных окнах
         document.getElementById('editFilmForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveFilmEdit();
-        });
-        document.getElementById('editHallForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveHallEdit();
         });
         document.getElementById('editSessionForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -120,9 +104,6 @@ class CinemaManager {
         document.getElementById('cancelEditFilm')?.addEventListener('click', () => {
             this.closeModal(document.getElementById('editFilmModal'));
         });
-        document.getElementById('cancelEditHall')?.addEventListener('click', () => {
-            this.closeModal(document.getElementById('editHallModal'));
-        });
         document.getElementById('cancelEditSession')?.addEventListener('click', () => {
             this.closeModal(document.getElementById('editSessionModal'));
         });
@@ -131,18 +112,30 @@ class CinemaManager {
         });
     }
 
+    setupTicketEventListeners() {
+        // Кнопка "Показать все билеты"
+        document.getElementById('showAllTickets')?.addEventListener('click', () => {
+            this.showAllTickets();
+        });
+    }
+
     // Утилиты для форм добавления
     showAddForm(formId) {
-        document.getElementById(formId).style.display = 'block';
-        document.getElementById(formId).scrollIntoView({ behavior: 'smooth' });
+        const formElement = document.getElementById(formId);
+        if (formElement) {
+            formElement.style.display = 'block';
+            formElement.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     hideAddForm(formId) {
-        document.getElementById(formId).style.display = 'none';
-        if (formId === 'addFilmForm') this.resetFilmForm();
-        if (formId === 'addHallForm') this.resetHallForm();
-        if (formId === 'addSessionForm') this.resetSessionForm();
-        if (formId === 'addTicketForm') this.resetTicketForm();
+        const formElement = document.getElementById(formId);
+        if (formElement) {
+            formElement.style.display = 'none';
+            if (formId === 'addFilmForm') this.resetFilmForm();
+            if (formId === 'addHallForm') this.resetHallForm();
+            if (formId === 'addSessionForm') this.resetSessionForm();
+        }
     }
 
     // Утилиты для модальных окон
@@ -178,20 +171,32 @@ class CinemaManager {
             this.populateFilmAndHallSelects();
         }
         
-        // При переключении на вкладку билетов обновляем список сеансов
+        // При переключении на вкладку билетов
         if (tabName === 'tickets') {
-            this.populateSessionSelect();
-            this.loadTickets(this.currentTicketFilters);
-            
-            if (!this.ticketStatsLoaded) {
-                this.loadTicketStats();
+            // Если есть информация о сеансе, показываем билеты только этого сеанса
+            if (this.currentSessionInfo && this.currentSessionInfo.sessionId) {
+                this.showSessionHeader();
+                this.loadTickets({ session_id: this.currentSessionInfo.sessionId });
+            } else {
+                // Иначе показываем все билеты
+                this.hideSessionHeader();
+                this.loadTickets();
             }
         }
+    }
+
+    // Показать все билеты
+    showAllTickets() {
+        this.currentSessionInfo = null;
+        this.hideSessionHeader();
+        this.loadTickets();
     }
 
     // Utility functions
     showMessage(text, type) {
         const messageDiv = document.getElementById('message');
+        if (!messageDiv) return;
+        
         messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
         
         if (type === 'success') {
@@ -215,6 +220,36 @@ class CinemaManager {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+
+    // Методы для работы с формами (будут переопределены в других файлах)
+    loadFilms() {}
+    loadHalls() {}
+    loadSessions() {}
+    loadTickets() {}
+    renderFilmsTable() {}
+    renderHallsTable() {}
+    renderSessionsTable() {}
+    renderTicketsTable() {}
+    populateFilmAndHallSelects() {}
+    populateSessionSelect() {}
+    editFilm() {}
+    editSession() {}
+    editTicket() {}
+    saveFilm() {}
+    saveFilmEdit() {}
+    saveHall() {}
+    saveSession() {}
+    saveSessionEdit() {}
+    saveTicketEdit() {}
+    resetFilmForm() {}
+    resetHallForm() {}
+    resetSessionForm() {}
+    resetTicketForm() {}
+    deleteFilm() {}
+    deleteHall() {}
+    deleteSession() {}
+    showSessionHeader() {}
+    hideSessionHeader() {}
 }
 
 // Инициализация приложения

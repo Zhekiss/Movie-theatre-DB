@@ -51,33 +51,30 @@ Object.assign(CinemaManager.prototype, {
         });
 
         document.querySelectorAll('.view-tickets-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const sessionId = e.target.getAttribute('data-id');
-                const filmTitle = e.target.getAttribute('data-film');
-                const hallNumber = e.target.getAttribute('data-hall');
-                const sessionTime = e.target.getAttribute('data-time');
-                const sessionPrice = e.target.getAttribute('data-price');
-                const rowsCount = e.target.getAttribute('data-rows');
-                const seatsPerRow = e.target.getAttribute('data-seats');
-                
-                // Сохраняем информацию о сеансе для отображения в tickets tab
-                this.currentSessionInfo = {
-                    sessionId,
-                    filmTitle,
-                    hallNumber,
-                    sessionTime,
-                    sessionPrice,
-                    rowsCount,
-                    seatsPerRow
-                };
-                
-                // Переключаемся на вкладку билетов
-                this.openTab('tickets');
-                
-                // Загружаем билеты для этого сеанса
-                this.loadTicketsForSession(sessionId);
-            });
-        });
+    button.addEventListener('click', (e) => {
+        const sessionId = e.target.getAttribute('data-id');
+        const filmTitle = e.target.getAttribute('data-film');
+        const hallNumber = e.target.getAttribute('data-hall');
+        const sessionTime = e.target.getAttribute('data-time');
+        const sessionPrice = e.target.getAttribute('data-price');
+        const rowsCount = e.target.getAttribute('data-rows');
+        const seatsPerRow = e.target.getAttribute('data-seats');
+        
+        // Сохраняем информацию о сеансе для отображения в tickets tab
+        window.cinemaManager.currentSessionInfo = {
+            sessionId,
+            filmTitle,
+            hallNumber,
+            sessionTime,
+            sessionPrice,
+            rowsCount,
+            seatsPerRow
+        };
+        
+        // Переключаемся на вкладку билетов
+        window.cinemaManager.openTab('tickets');
+    });
+});
 
         document.querySelectorAll('.delete-session-btn').forEach(button => {
             button.addEventListener('click', (e) => {
