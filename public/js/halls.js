@@ -1,6 +1,4 @@
-// Расширяем класс CinemaManager для функциональности залов
 Object.assign(CinemaManager.prototype, {
-    // Hall management
     async loadHalls() {
         try {
             const response = await fetch('/api/halls');
@@ -18,31 +16,25 @@ Object.assign(CinemaManager.prototype, {
         tbody.innerHTML = '';
 
         if (halls.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Нет данных о залах</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Нет данных о залах</td></tr>';
             return;
         }
 
         halls.forEach(hall => {
+            const totalSeats = hall.rows_count * hall.seats_per_row;
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${hall.hall_id}</td>
                 <td>${hall.hall_number}</td>
-                <td>${hall.capacity}</td>
+                <td>${hall.rows_count}</td>
+                <td>${hall.seats_per_row}</td>
+                <td>${totalSeats}</td>
                 <td class="actions-cell">
-                    <button class="edit-hall-btn" data-id="${hall.hall_id}" data-number="${hall.hall_number}" data-capacity="${hall.capacity}">Редактировать</button>
+                    <!-- УБРАНА КНОПКА РЕДАКТИРОВАНИЯ -->
                     <button class="delete delete-hall-btn" data-id="${hall.hall_id}" data-number="${hall.hall_number}">Удалить</button>
                 </td>
             `;
             tbody.appendChild(row);
-        });
-
-        document.querySelectorAll('.edit-hall-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const id = e.target.getAttribute('data-id');
-                const number = e.target.getAttribute('data-number');
-                const capacity = e.target.getAttribute('data-capacity');
-                this.editHall(id, number, capacity);
-            });
         });
 
         document.querySelectorAll('.delete-hall-btn').forEach(button => {
@@ -54,42 +46,36 @@ Object.assign(CinemaManager.prototype, {
         });
     },
 
-    editHall(id, number, capacity) {
-        document.getElementById('hallId').value = id;
-        document.getElementById('hallNumber').value = number;
-        document.getElementById('capacity').value = capacity;
-        document.getElementById('hallFormTitle').textContent = 'Редактировать зал';
-        this.currentEditingHallId = id;
-        
-        document.getElementById('hallForm').scrollIntoView({ behavior: 'smooth' });
-    },
-
     resetHallForm() {
-        document.getElementById('hallForm').reset();
+        const form = document.getElementById('hallForm');
+        if (form) form.reset();
         document.getElementById('hallId').value = '';
-        document.getElementById('hallFormTitle').textContent = 'Добавить зал';
         this.currentEditingHallId = null;
     },
 
     async saveHall() {
         const hallData = {
             hall_number: document.getElementById('hallNumber').value,
-            capacity: document.getElementById('capacity').value
+            rows_count: document.getElementById('rowsCount').value,
+            seats_per_row: document.getElementById('seatsPerRow').value
         };
 
         if (hallData.hall_number <= 0) {
             this.showMessage('Номер зала должен быть положительным числом', 'error');
             return;
         }
-
-        if (hallData.capacity <= 0) {
-            this.showMessage('Вместимость зала должна быть положительным числом', 'error');
+        if (hallData.rows_count <= 0) {
+            this.showMessage('Количество рядов должно быть положительным числом', 'error');
+            return;
+        }
+        if (hallData.seats_per_row <= 0) {
+            this.showMessage('Количество мест в ряду должно быть положительным числом', 'error');
             return;
         }
 
         try {
-            const url = this.currentEditingHallId ? `/api/halls/${this.currentEditingHallId}` : '/api/halls';
-            const method = this.currentEditingHallId ? 'PUT' : 'POST';
+            const url = '/api/halls';
+            const method = 'POST';
 
             const response = await fetch(url, {
                 method: method,
@@ -102,9 +88,8 @@ Object.assign(CinemaManager.prototype, {
             const result = await response.json();
 
             if (response.ok) {
-                const message = this.currentEditingHallId ? 'Зал обновлен' : 'Зал добавлен';
-                this.showMessage(message, 'success');
-                this.resetHallForm();
+                this.showMessage('Зал добавлен', 'success');
+                this.hideAddForm('addHallForm');
                 await this.loadHalls();
             } else {
                 this.showMessage(result.error || 'Произошла ошибка', 'error');
@@ -129,8 +114,6 @@ Object.assign(CinemaManager.prototype, {
             if (response.ok) {
                 this.showMessage(result.message, 'success');
                 await this.loadHalls();
-                await this.loadSessions();
-                await this.loadTickets();
             } else {
                 this.showMessage(result.error || 'Произошла ошибка при удалении', 'error');
             }

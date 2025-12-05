@@ -129,6 +129,34 @@ function filmsRoutes(pool) {
         }
     });
 
+    router.get('/revenue', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT 
+                f.film_id,
+                f.film_title,
+                COALESCE(SUM(s.price * occupied_tickets.ticket_count), 0) AS revenue
+            FROM Films f
+            LEFT JOIN Sessions s ON f.film_id = s.film_id
+            LEFT JOIN (
+                SELECT 
+                    session_id,
+                    COUNT(*) AS ticket_count
+                FROM Tickets 
+                WHERE is_occupied = true
+                GROUP BY session_id
+            ) AS occupied_tickets ON s.session_id = occupied_tickets.session_id
+            GROUP BY f.film_id, f.film_title
+            ORDER BY revenue DESC
+        `);
+        
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Ошибка при расчете дохода фильмов: ' + err.message });
+    }
+});
+
     return router;
 }
 

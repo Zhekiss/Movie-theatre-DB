@@ -22,10 +22,11 @@ function hallsRoutes(pool) {
 
     router.post('/', async (req, res) => {
         try {
-            const { hall_number, capacity } = req.body;
+            const { hall_number, rows_count, seats_per_row } = req.body;
             
             const sanitizedNumber = parseInt(hall_number);
-            const sanitizedCapacity = parseInt(capacity);
+            const sanitizedRows = parseInt(rows_count);
+            const sanitizedSeats = parseInt(seats_per_row);
 
             const existingHall = await pool.query(
                 'SELECT * FROM Halls WHERE hall_number = $1',
@@ -38,11 +39,25 @@ function hallsRoutes(pool) {
                 });
             }
 
+            if (sanitizedRows <= 0) {
+                return res.status(400).json({ error: 'Количество рядов должно быть больше 0' });
+            }
+            
+            if (sanitizedSeats <= 0) {
+                return res.status(400).json({ error: 'Количество мест в ряду должно быть больше 0' });
+            }
+
             const result = await pool.query(
-                'INSERT INTO Halls (hall_number, capacity) VALUES ($1, $2) RETURNING *',
-                [sanitizedNumber, sanitizedCapacity]
+                'INSERT INTO Halls (hall_number, rows_count, seats_per_row) VALUES ($1, $2, $3) RETURNING *',
+                [sanitizedNumber, sanitizedRows, sanitizedSeats]
             );
-            res.json(result.rows[0]);
+            
+            const hallWithCapacity = {
+                ...result.rows[0],
+                capacity: result.rows[0].rows_count * result.rows[0].seats_per_row
+            };
+            
+            res.json(hallWithCapacity);
         } catch (err) {
             console.error(err);
             if (err.code === '23505') {
@@ -56,10 +71,11 @@ function hallsRoutes(pool) {
     router.put('/:id', async (req, res) => {
         try {
             const { id } = req.params;
-            const { hall_number, capacity } = req.body;
+            const { hall_number, rows_count, seats_per_row } = req.body;
             
             const sanitizedNumber = parseInt(hall_number);
-            const sanitizedCapacity = parseInt(capacity);
+            const sanitizedRows = parseInt(rows_count);
+            const sanitizedSeats = parseInt(seats_per_row);
 
             const duplicateCheck = await pool.query(
                 'SELECT * FROM Halls WHERE hall_number = $1 AND hall_id != $2',
@@ -72,16 +88,29 @@ function hallsRoutes(pool) {
                 });
             }
 
+            if (sanitizedRows <= 0) {
+                return res.status(400).json({ error: 'Количество рядов должно быть больше 0' });
+            }
+            
+            if (sanitizedSeats <= 0) {
+                return res.status(400).json({ error: 'Количество мест в ряду должно быть больше 0' });
+            }
+
             const result = await pool.query(
-                'UPDATE Halls SET hall_number = $1, capacity = $2 WHERE hall_id = $3 RETURNING *',
-                [sanitizedNumber, sanitizedCapacity, id]
+                'UPDATE Halls SET hall_number = $1, rows_count = $2, seats_per_row = $3 WHERE hall_id = $4 RETURNING *',
+                [sanitizedNumber, sanitizedRows, sanitizedSeats, id]
             );
             
             if (result.rowCount === 0) {
                 return res.status(404).json({ error: 'Зал не найден' });
             }
             
-            res.json(result.rows[0]);
+            const hallWithCapacity = {
+                ...result.rows[0],
+                capacity: result.rows[0].rows_count * result.rows[0].seats_per_row
+            };
+            
+            res.json(hallWithCapacity);
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Ошибка при обновлении зала: ' + err.message });

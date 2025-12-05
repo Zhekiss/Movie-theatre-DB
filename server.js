@@ -4,7 +4,6 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-// Импортируем маршруты
 const filmsRoutes = require('./routes/films');
 const hallsRoutes = require('./routes/halls');
 const sessionsRoutes = require('./routes/sessions');
@@ -13,7 +12,6 @@ const ticketsRoutes = require('./routes/tickets');
 const app = express();
 const port = 3000;
 
-// Middleware для безопасности
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -25,14 +23,12 @@ app.use(helmet({
     }
 }));
 
-// Лимит запросов
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100
 });
 app.use(limiter);
 
-// Подключение к PostgreSQL
 const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
@@ -44,7 +40,6 @@ const pool = new Pool({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Подключаем маршруты
 app.use('/api/films', filmsRoutes(pool));
 app.use('/api/halls', hallsRoutes(pool));
 app.use('/api/sessions', sessionsRoutes(pool));
