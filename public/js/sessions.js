@@ -91,7 +91,6 @@ Object.assign(CinemaManager.prototype, {
         const hallSelect = document.getElementById('sessionHall');
         const editHallSelect = document.getElementById('editSessionHall');
 
-        // Заполняем select для добавления сеанса
         if (filmSelect) {
             filmSelect.innerHTML = '<option value="">Выберите фильм</option>';
             this.films.forEach(film => {
@@ -113,7 +112,6 @@ Object.assign(CinemaManager.prototype, {
             });
         }
 
-        // Заполняем select для редактирования сеанса
         if (editFilmSelect) {
             editFilmSelect.innerHTML = '<option value="">Выберите фильм</option>';
             this.films.forEach(film => {
@@ -137,13 +135,10 @@ Object.assign(CinemaManager.prototype, {
     },
 
     editSession(id, filmId, hallId, time, price) {
-        // Сначала открываем модальное окно
         this.openModal('editSessionModal');
         
-        // Затем заполняем select'ы и устанавливаем значения
         this.populateFilmAndHallSelects();
         
-        // Устанавливаем значения с небольшой задержкой, чтобы DOM успел обновиться
         setTimeout(() => {
             document.getElementById('editSessionId').value = id;
             document.getElementById('editSessionFilm').value = filmId;
@@ -172,7 +167,6 @@ Object.assign(CinemaManager.prototype, {
             price: document.getElementById('sessionPrice').value
         };
 
-        // Валидация
         if (!sessionData.film_id) {
             this.showMessage('Выберите фильм', 'error');
             return;
@@ -226,7 +220,6 @@ Object.assign(CinemaManager.prototype, {
         console.log('Данные для отправки:', sessionData);
         console.log('ID сеанса:', sessionId);
 
-        // Валидация
         if (!sessionData.film_id) {
             this.showMessage('Выберите фильм', 'error');
             return;

@@ -1,11 +1,8 @@
-// Функционал для работы с билетами
 Object.assign(CinemaManager.prototype, {
-    // Загрузка билетов
     async loadTickets(filters = {}) {
         try {
             const url = new URL('/api/tickets', window.location.origin);
             
-            // Добавляем фильтры, если есть
             if (filters.session_id) {
                 url.searchParams.append('session_id', filters.session_id);
             }
@@ -20,7 +17,6 @@ Object.assign(CinemaManager.prototype, {
         }
     },
 
-    // Показать заголовок сеанса
     showSessionHeader() {
         if (this.currentSessionInfo) {
             const header = document.getElementById('ticketSessionHeader');
@@ -43,7 +39,6 @@ Object.assign(CinemaManager.prototype, {
         }
     },
 
-    // Скрыть заголовок сеанса
     hideSessionHeader() {
         const header = document.getElementById('ticketSessionHeader');
         const mainTitle = document.getElementById('ticketsMainTitle');
@@ -55,7 +50,6 @@ Object.assign(CinemaManager.prototype, {
         }
     },
 
-    // Отрисовка таблицы билетов
     renderTicketsTable(tickets) {
         const tbody = document.getElementById('ticketsTableBody');
         const thead = document.getElementById('ticketsTableHeader');
@@ -78,12 +72,9 @@ Object.assign(CinemaManager.prototype, {
             return;
         }
 
-        // Определяем, показываем ли мы информацию о сеансе в заголовке
         const showSessionInfo = this.currentSessionInfo;
         
-        // Обновляем заголовок таблицы в зависимости от режима
         if (showSessionInfo) {
-            // В режиме просмотра сеанса показываем упрощенный заголовок
             thead.innerHTML = `
                 <tr>
                     <th>ID</th>
@@ -95,7 +86,6 @@ Object.assign(CinemaManager.prototype, {
                 </tr>
             `;
         } else {
-            // В общем режиме показываем полный заголовок
             thead.innerHTML = `
                 <tr>
                     <th>ID</th>
@@ -117,7 +107,6 @@ Object.assign(CinemaManager.prototype, {
             const statusClass = ticket.is_occupied ? 'occupied' : 'free';
             
             if (showSessionInfo) {
-                // Упрощенный вид для режима сеанса
                 row.innerHTML = `
                     <td>${ticket.ticket_id}</td>
                     <td>${this.escapeHtml(ticket.customer_name || '')}</td>
@@ -129,7 +118,6 @@ Object.assign(CinemaManager.prototype, {
                     </td>
                 `;
             } else {
-                // Полный вид для общего режима
                 row.innerHTML = `
                     <td>${ticket.ticket_id}</td>
                     <td>${new Date(ticket.start_time).toLocaleString('ru-RU')}</td>
@@ -151,7 +139,6 @@ Object.assign(CinemaManager.prototype, {
         this.attachTicketEventListeners();
     },
 
-    // Привязка обработчиков событий к кнопкам редактирования
     attachTicketEventListeners() {
         document.querySelectorAll('.edit-ticket-btn').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -162,10 +149,8 @@ Object.assign(CinemaManager.prototype, {
                 const seat = e.target.getAttribute('data-seat');
                 
                 if (this.currentSessionInfo) {
-                    // В режиме сеанса используем информацию из currentSessionInfo
                     this.editTicket(id, customer, occupied, row, seat);
                 } else {
-                    // В общем режиме получаем дополнительные данные из data-атрибутов
                     const film = e.target.getAttribute('data-film');
                     const time = e.target.getAttribute('data-time');
                     const hall = e.target.getAttribute('data-hall');
@@ -175,7 +160,6 @@ Object.assign(CinemaManager.prototype, {
         });
     },
 
-    // Редактирование билета
     editTicket(id, customer, occupied, row, seat, film = null, time = null, hall = null) {
         document.getElementById('editTicketId').value = id;
         document.getElementById('editTicketCustomer').value = customer || '';
@@ -184,7 +168,6 @@ Object.assign(CinemaManager.prototype, {
         const ticketInfo = document.getElementById('editTicketInfo');
         
         if (this.currentSessionInfo) {
-            // Используем информацию из сеанса
             ticketInfo.innerHTML = `
                 <div class="ticket-details">
                     <p><strong>Фильм:</strong> ${this.currentSessionInfo.filmTitle}</p>
@@ -194,7 +177,6 @@ Object.assign(CinemaManager.prototype, {
                 </div>
             `;
         } else if (film && time && hall) {
-            // Используем информацию из атрибутов
             ticketInfo.innerHTML = `
                 <div class="ticket-details">
                     <p><strong>Фильм:</strong> ${film}</p>
@@ -214,7 +196,6 @@ Object.assign(CinemaManager.prototype, {
         this.openModal('editTicketModal');
     },
 
-    // Сохранение изменений билета
     async saveTicketEdit() {
         const ticketData = {
             customer_name: document.getElementById('editTicketCustomer').value.trim(),
@@ -238,7 +219,6 @@ Object.assign(CinemaManager.prototype, {
                 this.showMessage('Билет обновлен', 'success');
                 this.closeModal(document.getElementById('editTicketModal'));
                 
-                // Перезагружаем билеты с текущими фильтрами
                 if (this.currentSessionInfo && this.currentSessionInfo.sessionId) {
                     await this.loadTickets({ session_id: this.currentSessionInfo.sessionId });
                 } else {
@@ -252,21 +232,17 @@ Object.assign(CinemaManager.prototype, {
         }
     },
 
-    // Показать все билеты (обработчик для кнопки "Показать все билеты")
     showAllTickets() {
         this.currentSessionInfo = null;
         this.hideSessionHeader();
         this.loadTickets();
     },
 
-    // Настройка обработчиков событий (должна вызываться из main.js)
     setupTicketEventListeners() {
-        // Кнопка "Показать все билеты"
         document.getElementById('showAllTickets')?.addEventListener('click', () => {
             this.showAllTickets();
         });
 
-        // Кнопка отмены в модальном окне редактирования билета
         document.getElementById('cancelEditTicket')?.addEventListener('click', () => {
             this.closeModal(document.getElementById('editTicketModal'));
         });

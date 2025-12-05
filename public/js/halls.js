@@ -60,7 +60,6 @@ Object.assign(CinemaManager.prototype, {
             seats_per_row: document.getElementById('seatsPerRow').value
         };
 
-        // Валидация
         if (hallData.hall_number <= 0) {
             this.showMessage('Номер зала должен быть положительным числом', 'error');
             return;

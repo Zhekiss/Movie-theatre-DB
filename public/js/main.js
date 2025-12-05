@@ -1,4 +1,3 @@
-// Основной класс приложения
 class CinemaManager {
     constructor() {
         this.currentEditingFilmId = null;
@@ -10,7 +9,7 @@ class CinemaManager {
         this.sessions = [];
         this.tickets = [];
         this.currentTicketFilters = {};
-        this.currentSessionInfo = null; // Информация о текущем сеансе для показа билетов
+        this.currentSessionInfo = null;
         this.init();
     }
 
@@ -21,7 +20,7 @@ class CinemaManager {
         this.loadTickets();
         this.setupEventListeners();
         this.setupModalEvents();
-        this.setupTicketEventListeners(); // Добавляем обработчики для билетов
+        this.setupTicketEventListeners();
     }
 
     setupEventListeners() {
@@ -32,7 +31,6 @@ class CinemaManager {
             });
         });
 
-        // Кнопки показа форм добавления
         document.getElementById('showAddFilmForm')?.addEventListener('click', () => {
             this.showAddForm('addFilmForm');
         });
@@ -44,7 +42,6 @@ class CinemaManager {
             this.populateFilmAndHallSelects();
         });
 
-        // Формы добавления
         document.getElementById('filmForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveFilm();
@@ -58,7 +55,6 @@ class CinemaManager {
             this.saveSession();
         });
 
-        // Кнопки отмены в формах добавления
         document.getElementById('cancelFilm')?.addEventListener('click', () => {
             this.hideAddForm('addFilmForm');
         });
@@ -69,7 +65,6 @@ class CinemaManager {
             this.hideAddForm('addSessionForm');
         });
 
-        // Формы редактирования в модальных окнах
         document.getElementById('editFilmForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveFilmEdit();
@@ -88,7 +83,6 @@ class CinemaManager {
     }
 
     setupModalEvents() {
-        // Закрытие модальных окон
         document.querySelectorAll('.close-modal, .modal').forEach(element => {
             if (element.classList.contains('close-modal')) {
                 element.addEventListener('click', () => {
@@ -103,7 +97,6 @@ class CinemaManager {
             }
         });
 
-        // Кнопки отмены в модальных окнах
         document.getElementById('cancelEditFilm')?.addEventListener('click', () => {
             this.closeModal(document.getElementById('editFilmModal'));
         });
@@ -125,13 +118,11 @@ class CinemaManager {
     }
 
     setupTicketEventListeners() {
-        // Кнопка "Показать все билеты"
         document.getElementById('showAllTickets')?.addEventListener('click', () => {
             this.showAllTickets();
         });
     }
 
-    // Утилиты для форм добавления
     showAddForm(formId) {
         const formElement = document.getElementById(formId);
         if (formElement) {
@@ -150,7 +141,6 @@ class CinemaManager {
         }
     }
 
-    // Утилиты для модальных окон
     openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -178,33 +168,27 @@ class CinemaManager {
         document.getElementById(tabName).classList.add('active');
         document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 
-        // При переключении на вкладку сеансов обновляем списки фильмов и залов
         if (tabName === 'sessions') {
             this.populateFilmAndHallSelects();
         }
         
-        // При переключении на вкладку билетов
         if (tabName === 'tickets') {
-            // Если есть информация о сеансе, показываем билеты только этого сеанса
             if (this.currentSessionInfo && this.currentSessionInfo.sessionId) {
                 this.showSessionHeader();
                 this.loadTickets({ session_id: this.currentSessionInfo.sessionId });
             } else {
-                // Иначе показываем все билеты
                 this.hideSessionHeader();
                 this.loadTickets();
             }
         }
     }
 
-    // Показать все билеты
     showAllTickets() {
         this.currentSessionInfo = null;
         this.hideSessionHeader();
         this.loadTickets();
     }
 
-    // Utility functions
     showMessage(text, type) {
         const messageDiv = document.getElementById('message');
         if (!messageDiv) return;
@@ -233,7 +217,6 @@ class CinemaManager {
             .replace(/'/g, "&#039;");
     }
 
-    // Методы для работы с формами (будут переопределены в других файлах)
     loadFilms() {}
     loadHalls() {}
     loadSessions() {}
@@ -265,7 +248,6 @@ class CinemaManager {
     showFilmRevenue() {}
 }
 
-// Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
     window.cinemaManager = new CinemaManager();
 });

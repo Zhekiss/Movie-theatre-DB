@@ -26,7 +26,6 @@ function ticketsRoutes(pool) {
         const params = [];
         let paramCount = 0;
 
-        // Только фильтр по session_id (для кнопки "Показать билеты" из сеанса)
         if (session_id) {
             paramCount++;
             conditions.push(`t.session_id = $${paramCount}`);
@@ -69,7 +68,6 @@ function ticketsRoutes(pool) {
                 return res.status(404).json({ error: 'Билет не найден' });
             }
 
-            // Если место освобождается, очищаем имя покупателя
             let finalCustomerName = sanitizedCustomerName;
             if (!sanitizedIsOccupied && sanitizedCustomerName) {
                 finalCustomerName = null;

@@ -377,7 +377,7 @@ button.warning:hover {
     }
 }
 
-/* Стили для кнопки добавления в начале таблицы */
+/* add-btns */
 .add-btn-container {
     display: flex;
     justify-content: space-between;
@@ -402,7 +402,7 @@ button.warning:hover {
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
-/* Адаптивность модальных окон */
+/* responsive for modal windows */
 @media (max-width: 768px) {
     .modal-content {
         margin: 5% auto;
@@ -421,7 +421,7 @@ button.warning:hover {
     }
 }
 
-/* Стили для статуса билетов */
+/* for tickets status */
 .ticket-status {
     padding: 4px 8px;
     border-radius: 4px;
@@ -440,7 +440,7 @@ button.warning:hover {
     color: #721c24;
 }
 
-/* Стили для информации о сеансе в билетах */
+/* for sessions info (in ticket tab) */
 .session-header {
     background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
     padding: 20px;
@@ -466,7 +466,7 @@ button.warning:hover {
     color: #1565c0;
 }
 
-/* Стили для деталей билета в модальном окне */
+/* tickets details in the modal windows */
 .ticket-details {
     background: #f8f9fa;
     padding: 15px;
@@ -479,12 +479,11 @@ button.warning:hover {
     margin: 5px 0;
 }
 
-/* Убираем кнопку добавления билета */
 #showAddTicketForm {
     display: none;
 }
 
-/* Стили для кнопок в заголовке */
+/* headings btns */
 .header-buttons {
     display: flex;
     gap: 10px;
@@ -504,7 +503,7 @@ button.warning:hover {
     box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
 }
 
-/* Стили для таблицы дохода */
+/* revenue */
 .revenue-table {
     width: 100%;
     margin: 20px 0;
@@ -537,7 +536,6 @@ button.warning:hover {
     background-color: #f8f9fa;
 }
 
-/* Сводка дохода */
 .revenue-summary {
     background: #e3f2fd;
     padding: 15px;
@@ -555,7 +553,6 @@ button.warning:hover {
     color: #1565c0;
 }
 
-/* Общий доход */
 .total-revenue {
     background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
     padding: 15px;
@@ -568,7 +565,6 @@ button.warning:hover {
     border: 2px solid #c3e6cb;
 }
 
-/* Адаптивность для модального окна дохода */
 @media (max-width: 768px) {
     .header-buttons {
         flex-direction: column;

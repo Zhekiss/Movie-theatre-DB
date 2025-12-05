@@ -10,9 +10,7 @@ function sessionsRoutes(pool) {
         return input;
     }
 
-    // Функция для создания билетов при создании сеанса
     async function createTicketsForSession(client, sessionId, hallId) {
-        // Получаем информацию о зале
         const hallInfo = await client.query(
             'SELECT rows_count, seats_per_row FROM Halls WHERE hall_id = $1',
             [hallId]
@@ -25,7 +23,6 @@ function sessionsRoutes(pool) {
         const { rows_count, seats_per_row } = hallInfo.rows[0];
         const tickets = [];
 
-        // Создаем билеты для всех мест в зале
         for (let row = 1; row <= rows_count; row++) {
             for (let seat = 1; seat <= seats_per_row; seat++) {
                 tickets.push({
@@ -38,7 +35,6 @@ function sessionsRoutes(pool) {
             }
         }
 
-        // Вставляем все билеты
         for (const ticket of tickets) {
             await client.query(
                 'INSERT INTO Tickets (session_id, customer_name, seat_number, row_number, is_occupied) VALUES ($1, $2, $3, $4, $5)',
@@ -76,7 +72,6 @@ function sessionsRoutes(pool) {
             const sanitizedHallId = parseInt(hall_id);
             const sanitizedPrice = parseFloat(price);
 
-            // Проверяем существование фильма и зала
             const filmCheck = await client.query('SELECT * FROM Films WHERE film_id = $1', [sanitizedFilmId]);
             const hallCheck = await client.query('SELECT * FROM Halls WHERE hall_id = $1', [sanitizedHallId]);
 
@@ -88,7 +83,6 @@ function sessionsRoutes(pool) {
                 throw new Error('Указанный зал не существует');
             }
 
-            // Проверяем конфликты времени
             const timeConflictCheck = await client.query(
                 `SELECT * FROM Sessions 
                  WHERE hall_id = $1 
@@ -101,7 +95,6 @@ function sessionsRoutes(pool) {
                 throw new Error('Время сеанса пересекается с другим сеансом в этом зале. Минимальный интервал - 30 минут.');
             }
 
-            // Создаем сеанс
             const sessionResult = await client.query(
                 'INSERT INTO Sessions (film_id, hall_id, start_time, price) VALUES ($1, $2, $3, $4) RETURNING *',
                 [sanitizedFilmId, sanitizedHallId, start_time, sanitizedPrice]
@@ -109,12 +102,10 @@ function sessionsRoutes(pool) {
 
             const sessionId = sessionResult.rows[0].session_id;
 
-            // Создаем билеты для этого сеанса
             const ticketsCount = await createTicketsForSession(client, sessionId, sanitizedHallId);
 
             await client.query('COMMIT');
 
-            // Получаем полную информацию о сеансе
             const fullSession = await pool.query(`
                 SELECT s.*, f.film_title, h.hall_number, h.rows_count, h.seats_per_row
                 FROM Sessions s 
@@ -145,7 +136,6 @@ function sessionsRoutes(pool) {
             const sanitizedHallId = parseInt(hall_id);
             const sanitizedPrice = parseFloat(price);
 
-            // Проверки существования
             const filmCheck = await pool.query('SELECT * FROM Films WHERE film_id = $1', [sanitizedFilmId]);
             const hallCheck = await pool.query('SELECT * FROM Halls WHERE hall_id = $1', [sanitizedHallId]);
 
@@ -157,7 +147,6 @@ function sessionsRoutes(pool) {
                 return res.status(400).json({ error: 'Указанный зал не существует' });
             }
 
-            // Проверка конфликтов времени
             const timeConflictCheck = await pool.query(
                 `SELECT * FROM Sessions 
                  WHERE hall_id = $1 
@@ -214,13 +203,11 @@ function sessionsRoutes(pool) {
                 return res.status(404).json({ error: 'Сеанс не найден' });
             }
 
-            // Удаляем билеты
             const ticketsDeleted = await pool.query(
                 'DELETE FROM Tickets WHERE session_id = $1 RETURNING *',
                 [id]
             );
 
-            // Удаляем сеанс
             const result = await pool.query('DELETE FROM Sessions WHERE session_id = $1', [id]);
             
             res.json({ 

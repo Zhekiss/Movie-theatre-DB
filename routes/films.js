@@ -129,8 +129,7 @@ function filmsRoutes(pool) {
         }
     });
 
-    // Добавляем новый маршрут для расчета дохода
-router.get('/revenue', async (req, res) => {
+    router.get('/revenue', async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT 

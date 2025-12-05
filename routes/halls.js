@@ -28,7 +28,6 @@ function hallsRoutes(pool) {
             const sanitizedRows = parseInt(rows_count);
             const sanitizedSeats = parseInt(seats_per_row);
 
-            // Проверяем уникальность номера зала
             const existingHall = await pool.query(
                 'SELECT * FROM Halls WHERE hall_number = $1',
                 [sanitizedNumber]
@@ -40,7 +39,6 @@ function hallsRoutes(pool) {
                 });
             }
 
-            // Проверяем валидность данных
             if (sanitizedRows <= 0) {
                 return res.status(400).json({ error: 'Количество рядов должно быть больше 0' });
             }
@@ -54,7 +52,6 @@ function hallsRoutes(pool) {
                 [sanitizedNumber, sanitizedRows, sanitizedSeats]
             );
             
-            // Добавляем вычисляемое поле capacity для обратной совместимости
             const hallWithCapacity = {
                 ...result.rows[0],
                 capacity: result.rows[0].rows_count * result.rows[0].seats_per_row
@@ -80,7 +77,6 @@ function hallsRoutes(pool) {
             const sanitizedRows = parseInt(rows_count);
             const sanitizedSeats = parseInt(seats_per_row);
 
-            // Проверяем уникальность номера зала (исключая текущий)
             const duplicateCheck = await pool.query(
                 'SELECT * FROM Halls WHERE hall_number = $1 AND hall_id != $2',
                 [sanitizedNumber, id]
@@ -92,7 +88,6 @@ function hallsRoutes(pool) {
                 });
             }
 
-            // Проверяем валидность данных
             if (sanitizedRows <= 0) {
                 return res.status(400).json({ error: 'Количество рядов должно быть больше 0' });
             }
@@ -110,7 +105,6 @@ function hallsRoutes(pool) {
                 return res.status(404).json({ error: 'Зал не найден' });
             }
             
-            // Добавляем вычисляемое поле capacity для обратной совместимости
             const hallWithCapacity = {
                 ...result.rows[0],
                 capacity: result.rows[0].rows_count * result.rows[0].seats_per_row

@@ -77,7 +77,6 @@ Object.assign(CinemaManager.prototype, {
             rating: document.getElementById('rating').value
         };
 
-        // Валидация
         if (!filmData.film_title) {
             this.showMessage('Название фильма не может быть пустым', 'error');
             return;
@@ -125,7 +124,6 @@ Object.assign(CinemaManager.prototype, {
 
         const filmId = document.getElementById('editFilmId').value;
 
-        // Валидация
         if (filmData.duration_minutes <= 0) {
             this.showMessage('Длительность фильма должна быть положительным числом', 'error');
             return;
@@ -170,7 +168,6 @@ Object.assign(CinemaManager.prototype, {
         }
     },
     
-    // Метод для отображения модального окна с доходом
     displayRevenueModal(revenueData) {
     const tbody = document.getElementById('revenueTableBody');
     const summary = document.getElementById('revenueSummary');
@@ -181,7 +178,6 @@ Object.assign(CinemaManager.prototype, {
         return;
     }
     
-    // Очищаем таблицу
     tbody.innerHTML = '';
     
     if (revenueData.length === 0) {
@@ -195,23 +191,18 @@ Object.assign(CinemaManager.prototype, {
         summary.innerHTML = '<p>Нет данных для анализа</p>';
         totalElement.textContent = 'Общий доход: 0 руб.';
     } else {
-        // Сортируем по убыванию дохода
         revenueData.sort((a, b) => b.revenue - a.revenue);
         
-        // Рассчитываем общий доход
         const totalRevenue = revenueData.reduce((sum, film) => sum + parseFloat(film.revenue), 0);
         
-        // Рассчитываем средний доход
         const averageRevenue = totalRevenue / revenueData.length;
         
-        // Находим фильмы с максимальным и минимальным доходом
         const maxRevenueFilm = revenueData.reduce((max, film) => 
             film.revenue > max.revenue ? film : max, revenueData[0]);
         
         const minRevenueFilm = revenueData.reduce((min, film) => 
             film.revenue < min.revenue ? film : min, revenueData[0]);
         
-        // Заполняем сводку
         summary.innerHTML = `
             <p><strong>Всего фильмов:</strong> ${revenueData.length}</p>
             <p><strong>Самый прибыльный фильм:</strong> ${maxRevenueFilm.film_title} (${parseFloat(maxRevenueFilm.revenue).toFixed(2)} руб.)</p>
@@ -219,7 +210,6 @@ Object.assign(CinemaManager.prototype, {
             <p><strong>Средний доход на фильм:</strong> ${averageRevenue.toFixed(2)} руб.</p>
         `;
         
-        // Заполняем таблицу (без цветовых классов)
         revenueData.forEach(film => {
             const row = document.createElement('tr');
             const revenue = parseFloat(film.revenue);
@@ -231,11 +221,9 @@ Object.assign(CinemaManager.prototype, {
             tbody.appendChild(row);
         });
         
-        // Отображаем общий доход
         totalElement.textContent = `Общий доход: ${totalRevenue.toFixed(2)} руб.`;
     }
     
-    // Показываем модальное окно
     this.openModal('revenueModal');
 },
 
