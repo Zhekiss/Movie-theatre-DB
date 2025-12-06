@@ -4,6 +4,7 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
+// import routes
 const filmsRoutes = require('./routes/films');
 const hallsRoutes = require('./routes/halls');
 const sessionsRoutes = require('./routes/sessions');

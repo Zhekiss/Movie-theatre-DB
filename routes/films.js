@@ -3,6 +3,7 @@ const express = require('express');
 function filmsRoutes(pool) {
     const router = express.Router();
 
+    //avoid special signs
     function sanitizeInput(input) {
         if (typeof input === 'string') {
             return input.replace(/[;'"\\]/g, '');
@@ -10,6 +11,7 @@ function filmsRoutes(pool) {
         return input;
     }
 
+    //GET
     router.get('/', async (req, res) => {
         try {
             const result = await pool.query('SELECT * FROM Films ORDER BY film_id');
@@ -20,6 +22,7 @@ function filmsRoutes(pool) {
         }
     });
 
+    //POST
     router.post('/', async (req, res) => {
         try {
             const { film_title, duration_minutes, rating } = req.body;
@@ -44,6 +47,7 @@ function filmsRoutes(pool) {
                 [sanitizedTitle, sanitizedDuration, sanitizedRating]
             );
             res.json(result.rows[0]);
+            
         } catch (err) {
             console.error(err);
             if (err.code === '23505') {
@@ -54,6 +58,7 @@ function filmsRoutes(pool) {
         }
     });
 
+    //PUT
     router.put('/:id', async (req, res) => {
         try {
             const { id } = req.params;
@@ -78,6 +83,7 @@ function filmsRoutes(pool) {
         }
     });
 
+    //DELETE
     router.delete('/:id', async (req, res) => {
         const client = await pool.connect();
         try {
@@ -129,6 +135,7 @@ function filmsRoutes(pool) {
         }
     });
 
+    //GET - for revenue
     router.get('/revenue', async (req, res) => {
     try {
         const result = await pool.query(`
